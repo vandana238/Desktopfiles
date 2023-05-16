@@ -1,0 +1,165 @@
+/* You can add global styles to this file, and also import other style files */
+.pointer {
+  cursor: pointer;
+}
+
+
+.text-muted-ex {
+  color: lighten(#333, 40%);
+}
+
+.px-card-body {
+  padding: 0px 1.25px;
+}
+
+
+//antd specific overwrites
+.ant-tabs-tab-active {
+  font-weight: 600 !important;
+}
+
+i svg {
+  margin-top: -5px;
+}
+
+.card-body {
+  place-items: center;
+}
+
+//component specific styles for overwrites
+.conversations-container {
+  .left-section-topbar {
+    .ant-tabs-nav .ant-tabs-tab {
+      padding: 8px 10px 18px 16px;
+    }
+
+    .ant-tabs-ink-bar {
+      height: 3px;
+    }
+
+    .ant-tabs-nav-wrap {
+      padding: 0rem 1.25rem;
+    }
+  }
+}
+
+body {
+  height     : 100%;
+  font-family: "PT Sans", sans-serif;
+  overflow   : hidden;
+}
+
+.ant-scroll-number {
+  overflow: hidden;
+  margin  : 3px;
+}
+
+.ant-collapse-content>.ant-collapse-content-box {
+  padding   : 0px;
+  max-height: calc(100vh - 84vh);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+
+// .ant-input-group-addon:last-child {
+//   border-top-left-radius: 0;
+//   border-bottom-left-radius: 0;
+//   padding: 0px 15px 10px 15px !important;
+//   font-size: 25px !important;
+// }
+.ant-card-head-title {
+  font-size: 30px;
+}
+
+.ant-card-actions>li>span {
+  // padding-top:10px;
+  text-align-last: right;
+}
+
+.conversations-container {
+  .right-section-content {
+    .chat-component {
+      .right-layout {
+        .chat-input {
+          .ng-tns-c139-0 {
+            .ant-input-group-wrapper {
+              .ant-input-wrapper input {
+                .ant-input-group {
+                  .ant-input:first-child {
+                    background-color: red;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+      }
+
+      background-color: red;
+    }
+  }
+}
+
+.anticon {
+  vertical-align: 0rem;
+}
+
+.ant-input-group>.ant-input:last-child,
+.ant-input-group-addon:last-child {
+  border-top-left-radius   : 0;
+  border-bottom-left-radius: 0;
+  font-size                : 26px;
+}
+
+
+.ant-collapse>.ant-collapse-item>.ant-collapse-header {
+  color      : #999999;
+  font-weight: 900;
+  font-size  : 17px;
+
+  .ant-collapse-arrow {
+    color     : orangered;
+    margin-top: 2px;
+    font-size : 16px;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #eee;
+
+}
+
+::-webkit-scrollbar-thumb {
+  background   : #acacacc5;
+  border-radius: 0px;
+  height       : 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #acacacc5;
+}
+
+.ant-cascader-input.ant-input {
+  //   height: 45px !important;
+  //   // border: none !important;
+  // width: 6.5rem;
+  //   margin-top: 4px;
+  height: 50px;
+  border: double;
+}
+
+nz-cascader {
+  width: 100% !important;
+}
+
+.ant-alert-icon {
+  position: absolute;
+  top     : 15.5px;
+  left    : 16px;
+}

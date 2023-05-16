@@ -1,0 +1,238 @@
+<nz-layout>
+    <nz-layout class="inner-layout">
+        <app-header></app-header>
+        <nz-layout>
+            <div style="background: #ECECEC;padding:30px;">
+                <div nz-col [nzSpan]="24">
+                    <ng-template #title>
+                        <div nz-row>
+                            <div nz-col nzSpan="22"> Quick Response</div>
+                          
+                            <div nz-col nzSpan="2" style="margin-top: 0.5rem;"> <button style="float: right;" nz-button
+                                    nzType="primary" (click)="open()">Add</button>
+
+                                <nz-drawer [nzWidth]="'400px'" [nzClosable]="true" [nzVisible]="visible"
+                                    nzPlacement="right" nzTitle="Add/create New Response" (nzOnClose)="close()">
+                                    <ng-container nzDrawerContent>
+                                        <nz-card [nzActions]="[ footer]">
+                                            <div nz-row>
+                                                <div style="width: 100%;">
+                                                    <label>Select Category</label>
+                                                    <!-- <input type="text" style="position: fixed;
+                                                    width: 25%;" class="form-control" placeholder="Choose Category" id="category"
+                                                    required  [(ngModel)]="category"> -->
+                                                    <!-- <input nz-input class="form-control" id="selected"
+                                                        class="form-control" #select
+                                                        (change)='onOptionsSelected(select.value)'
+                                                        placeholder="Enter Category" [nzAutocomplete]="casetype">
+                                                    <nz-autocomplete #casetype>
+                                                        <nz-auto-option *ngFor="let option of options"
+                                                            [nzValue]="option.value">{{option.value}}</nz-auto-option>
+                                                    </nz-autocomplete> -->
+                                                    <select id="selected" class="form-control" #select 
+                                                        (change)='onOptionsSelected(select.value)'>
+                                                        <option disabled selected>Choose category</option>
+                                                        <option *ngFor="let option of options">{{option.value}}</option>
+                                                        <option disabled>----------------</option>
+                                                        <option style="color: dodgerblue;">New Category</option>
+
+                                                    </select>
+                                                    <br>
+                                                </div>
+                                                <div style="width: 100%;"
+                                                    *ngIf="select.value && select.value=='New Category'">
+                                                    <label>Enter Category</label>
+                                                    <input type="text" class="form-control" placeholder="Category"
+                                                        id="category" required [(ngModel)]="category"
+                                                        (keyup)="checkCategory()">
+                                                    <br>
+                                                    <span *ngIf="isCategory" style="color:red">This category name
+                                                        already exists. Try a different name</span>
+
+                                                </div>
+                                                <div style="width: 100%;">
+
+                                                    <label class="label-text">Add Text responses</label>
+                                                    <input (keydown.enter)="addvalues()" [(ngModel)]="value" id="text"
+                                                        type="text" class="form-control"
+                                                        [disabled]="category==undefined || isCategory"
+                                                        placeholder="Enter text response">
+
+                                                    <br>
+
+                                                </div>
+                                                <nz-divider *ngIf="temp.length>0"></nz-divider>
+                                                <div *ngIf="data" style="  width: 100%;">
+                                                    <div nz-row class="chips" *ngFor="let value of temp;let i=index">
+                                                        <div nz-col nzSpan="22">{{value.label}}</div>
+                                                        <div nz-col nzSpan="2">
+                                                            <span class="icon-close" (click)="removeText(i)"><i nz-icon
+                                                                    nzType="close" nzTheme="outline"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span *ngIf="isExist" style="color:red">This response has been
+                                                    added</span>
+                                                <br>
+                                            </div>
+                                        </nz-card>
+                                    </ng-container>
+                                </nz-drawer>
+                            </div>
+                        </div>
+                    </ng-template>
+                    <nz-card [nzTitle]="title" style="height: 82vh; overflow-y: auto;">
+                        <div style="display: flex;justify-content: center; height: 70vh; align-items: center;" *ngIf="loader">
+                            <nz-spin [nzSpinning]="'true'" nzSimple [nzSize]="'large'"></nz-spin>
+                        </div>
+                        <div *ngIf="options.length==0" style="text-align: center;    padding: 30vh;">
+                            Click <strong>Add</strong> button to create new responses.
+                        </div>
+                        <nz-collapse nzAccordion *ngIf="options.length>0 && !loader">
+
+                            <nz-collapse-panel *ngFor="let option of options; let j=index" [nzHeader]="option.value"
+                                [nzExtra]="extraTpl" style="max-height:400px">
+
+                                <nz-table #editRowTable nzBordered [nzShowPagination]="false"
+                                    [nzData]="option.children">
+                                    <thead>
+                                        <tr>
+                                            <!-- <th nzWidth="5%">#</th> -->
+                                            <th>Response</th>
+                                            <th nzWidth="100px" style="text-align: center;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <ng-template #extraTpl>
+                                        <!-- You can use stopPropagation if you don't want the panel to toggle -->
+                                        <span class="pointer" style="padding:10px 10px 10px 0px;"
+                                            (click)="$event.stopPropagation();editCategory(j)">
+                                            <i style="color: rgb(34, 147, 253);" nz-icon nzType="edit"
+                                                nzTheme="outline"></i>
+                                        </span>
+                                        <i style="color: rgb(241, 40, 13);" nz-icon nzType="delete"
+                                            (click)="$event.stopPropagation();deleteCategory(j)"></i>
+                                    </ng-template>
+                                    <tbody cdkDropList (cdkDropListDropped)="drop($event,j)">
+                                        <tr *ngFor="let data of option.children;let i=index" class="editable-row"
+                                            cdkDrag>
+                                            <!-- <td>{{i+1 }}</td> -->
+                                            <td>{{ data.value }}</td>
+                                            <td style="text-align: center;">
+                                                <div>
+                                                    <ng-container>
+                                                        <!-- <span class="pointer" style="padding:10px 10px 10px 0px;"
+                                                        (click)="showModal1()">
+                                                            <i style="color: rgb(15, 106, 241);" nz-icon nzType="plus-circle"
+                                                                nzTheme="outline"></i>
+                                                        </span> -->
+                                                        <span class="pointer" style="padding:10px 10px 10px 0px;"
+                                                            (click)="edit(j,i)">
+                                                            <i style="color: rgb(236, 146, 10);" nz-icon nzType="edit"
+                                                                nzTheme="outline"></i>
+                                                        </span>
+                                                        <span class="pointer" style="padding: 10px 10px 10px 0px;"
+                                                            (click)="delete(j,i)">
+                                                            <i style="color: red;" nz-icon nzType="delete"
+                                                                nzTheme="outline"></i>
+                                                        </span>
+                                                    </ng-container>
+                                                </div>
+                                                <nz-modal [(nzVisible)]="isVisible"
+                                                    [nzTitle]="activeindex!=-1?options[activeindex].value:'null'"
+                                                    (nzOnCancel)="handleCancel()">
+                                                    <div>
+                                                        <textarea nz-input placeholder="Enter new response"
+                                                            nzSize="large" [(ngModel)]="response"></textarea>
+                                                    </div>
+                                                    <span *ngIf="isExist" style="color:red">This response has been
+                                                        already added</span>
+
+
+                                                    <div *nzModalFooter>
+                                                        <button nz-button nzType="primary"
+                                                            [nzLoading]="isConfirmLoading"
+                                                            (click)="handleOk()">Save</button>
+                                                        <button nz-button nzType="danger"
+                                                            (click)="handleCancel()">Cancel</button>
+                                                    </div>
+                                                </nz-modal>
+
+
+                                                <nz-modal [(nzVisible)]="isVisible1" *ngIf="activeindex>=0"
+                                                    nzTitle="Edit Category" (nzOnCancel)="handleCancelEdit()">
+                                                    <div>
+                                                        <input nz-input placeholder="Enter new response"
+                                                            [(ngModel)]="editCategoryName" (keyup)="checkCategory()"
+                                                            nzSize="large" />
+                                                    </div>
+                                                    <span *ngIf="isCategory" style="color:red">This category name
+                                                        already exists. Try a different name</span>
+
+                                                    <div *nzModalFooter>
+                                                        <button nz-button nzType="primary" [disabled]="isCategory"
+                                                            [nzLoading]="isConfirmLoading"
+                                                            (click)="handleOkEdit(activeindex)">Save</button>
+                                                        <button nz-button nzType="danger"
+                                                            (click)="handleCancelEdit()">Cancel</button>
+                                                    </div>
+                                                </nz-modal>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </nz-table>
+                            </nz-collapse-panel>
+
+                        </nz-collapse>
+                        <ng-template #footer>
+                            <div style="margin: 10px;">
+                                <div style="text-align: center;">
+                                    <button nz-button nzType="primary" [disabled]="temp.length==0"
+                                        (click)="createResponse()">Submit</button>
+                                </div>
+                            </div>
+
+                        </ng-template>
+                    </nz-card>
+                </div>
+            </div>
+
+        </nz-layout>
+    </nz-layout>
+</nz-layout>
+<!-- 
+<td>
+    <div>
+        <ng-container>
+            <span class="pointer" style="padding:10px 10px 10px 0px;"
+            (click)="showModal1()">
+                <i style="color: rgb(15, 106, 241);" nz-icon nzType="plus-circle"
+                    nzTheme="outline"></i>
+            </span>
+            <span class="pointer" style="padding:10px 10px 10px 0px;"
+                (click)="edit(j,i)">
+                <i style="color: rgb(236, 146, 10);" nz-icon nzType="edit"
+                    nzTheme="outline"></i>
+            </span>
+            <span class="pointer" style="padding: 10px 10px 10px 0px;"
+                (click)="delete(j,i)">
+                <i style="color: red;" nz-icon nzType="delete"
+                    nzTheme="outline"></i>
+            </span>
+        </ng-container>
+    </div>
+    <nz-modal [(nzVisible)]="isVisible"
+        [nzTitle]="activeindex!=-1?options[activeindex].value:'null'"
+        (nzOnCancel)="handleCancel()">
+        <div>
+            <input nz-input placeholder="Enter new response" nzSize="large"
+                [(ngModel)]="response" />
+        </div>
+        <div *nzModalFooter>
+            <button nz-button nzType="primary"
+                [nzLoading]="isConfirmLoading"
+                (click)="handleOk()">Save</button>
+            <button nz-button nzType="danger"
+                (click)="handleCancel()">Cancel</button>
+        </div>
+    </nz-modal>
+</td> -->

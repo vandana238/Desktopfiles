@@ -1,0 +1,1368 @@
+<nz-layout class="chat-component">
+    <app-left-menu></app-left-menu>
+    <nz-layout class="right-layout">
+        <div class="conversations-section">
+            <app-header></app-header>
+            <nz-modal [(nzVisible)]="isVisible" [nzOkText]="'Search'" [nzCancelText]="'Clear'" nzTitle="Advanced Search"
+                (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+                <ng-container>
+                    <div>
+                        <label>Name:</label>
+                        <input type="text" nz-input placeholder="E.g.Jack" [(ngModel)]="search.name" />
+                    </div> <br>
+                    <div>
+                        <label>Email:</label>
+                        <input type="text" nz-input placeholder="jack@example.com" [(ngModel)]="search.email" />
+                    </div><br>
+                    <div>
+                        <label class="label-text">Channel</label><br>
+                        <nz-radio-group [(ngModel)]="search.channel">
+                            <label nz-radio nzValue="msteams">Teams</label>
+                            <label nz-radio nzValue="directline">DirectLine</label>
+                        </nz-radio-group>
+                    </div> <br>
+                    <div>
+                        <label>Date:</label><br>
+                        <nz-range-picker [(ngModel)]="search.date"></nz-range-picker>
+                    </div>
+                </ng-container>
+            </nz-modal>
+            <div class="container-fluid conversations-container p-0">
+                <div nz-row class="h-100">
+                    <div nz-col nzSpan="6" class="border-bottom border-right">
+                        <div nz-row>
+                            <div nz-col nzSpan="20"
+                                style="padding: 12px 10px 8px 10px;display: flex;justify-content: space-evenly;">
+                                <nz-range-picker [(ngModel)]="search.date" (ngModelChange)="onChange($event)">
+                                </nz-range-picker>
+                            </div>
+                            <div nz-col nzSpan="4"
+                                style="display: flex;align-self: center;font-size: 20px;padding-top: 5px;cursor: pointer;justify-content: space-evenly;"
+                                (click)="showModal()">
+                                <span nz-tooltip
+                                    [nzTooltipTitle]="(search.name==null &&search.email==null && search.channel==null&&search.date==null)?'Advanced search':'Clear filter'"><i
+                                        nz-icon nzType="filter"
+                                        [nzTheme]="(search.name==null &&search.email==null && search.channel==null&&search.date==null)?'outline':'fill'"></i></span>
+                            </div>
+                        </div>
+                        <nz-divider style="margin:4px 0px" nzPlain></nz-divider>
+                        <div class="left-section-topbar">
+                            <nz-tabset>
+                                <nz-tab nzTitle="Active" (nzClick)="clear()" (nzSelect)="selectedTab('Active')">
+                                    <div class="section-wrapper ongoing-converastions-section">
+                                        <ng-template #header class="section-header text-uppercase text-muted-ex ">
+                                            <i nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'"
+                                                [nzTwotoneColor]="'#52c41a'"></i>
+                                            <span style="padding-left: 8px;">Ongoing converastions</span>
+
+                                            <nz-badge style="top:-4px" [nzCount]="newMessageChat"
+                                                class="site-badge-count-200"
+                                                [nzStyle]="{ backgroundColor: '#ff4d4f', color: '#fff' }"></nz-badge>
+                                        </ng-template>
+                                        <nz-collapse [nzExpandIconPosition]="'right'" [nzAccordion]="'true'"
+                                            class="text-muted-ex collapse-header">
+                                            <nz-collapse-panel [nzHeader]="header" [nzExpandedIcon]="'right-circle'"
+                                                [nzActive]="'active'">
+
+                                                <div class="section-content" *ngIf="!loaderConvos">
+                                                    <div class="each-conversation pointer card-body border-bottom"
+                                                        [@fadeInOut] *ngFor="let user of ongoing;let i=index "
+                                                        [class.active-conversation]="activeuser && activeuser.user&& (user.conversationID==activeuser.conversationID)"
+                                                        (click)="select(user,i)">
+                                                        <div nz-row>
+                                                            <div nz-col nzSpan="4" class="closed">
+                                                                <nz-avatar nzText="{{user.user.name| getfirstletter }}"
+                                                                    [style.backgroundColor]="user.profile"
+                                                                    nzSize="large">
+                                                                </nz-avatar>
+                                                            </div>
+                                                            <div nz-col nzSpan="18">
+                                                                <div nz-row>
+                                                                    <div nz-col nzSpan="14" class="user-name text-truncation" nz-tooltip
+                                                                        [nzTooltipTitle]=user.user.name>
+                                                                        <strong>{{user.user.name}}
+                                                                        </strong>
+                                                                    </div>
+
+                                                                    <div nz-col nzSpan="10"
+                                                                        style=" text-align-last: right;">
+                                                                        <span
+                                                                            class="text-muted-ex small">{{user.requestAt|
+                                                                            date:'short'}}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div nz-row>
+                                                                    <div nz-col nzSpan="24">
+                                                                        <div nz-tooltip [nzTooltipTitle]=user.user.id
+                                                                            class="user-email text-truncation">
+                                                                            {{user.user.id}}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div nz-col nzSpan="24"
+                                                                        [class.notify-message]="user.newMessages"
+                                                                        class="text-muted-ex message-preview mt-2 text-truncation"
+                                                                        *ngIf="user.transcript[user.transcript.length-1].text&& user.transcript.length>0">
+                                                                        {{user.transcript[user.transcript.length-1].text}}
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div nz-col nzSpan="2" class="closed">
+                                                                <span class="px-1 pointer" nz-popover
+                                                                    [nzPopoverContent]="contentTemplate"
+                                                                    nzPopoverTrigger="click"
+                                                                    nzPopoverPlacement="rightBottom">
+                                                                    <i nz-icon nzType="more"></i>
+                                                                </span>
+                                                                <ng-template #contentTemplate>
+                                                                    <div>
+                                                                        <div class="each-option pointer mt-2"
+                                                                            (click)="transfer(user)"><i nz-icon
+                                                                                nzType="send" class="mr-2"></i>
+                                                                            Transfer</div>
+                                                                        <!-- <div class="each-option pointer mt-2"
+                                                                            (click)="refresh(user)"><i nz-icon
+                                                                                nzType="reload"
+                                                                                class="mr-2"></i>
+                                                                            Refresh</div> -->
+                                                                        <div (click)="enduser(user,i)"
+                                                                            class="each-option pointer mt-2 text-danger">
+                                                                            <i nz-icon nzType="poweroff"
+                                                                                class="mr-2"></i>
+                                                                            End
+                                                                        </div>
+                                                                    </div>
+                                                                </ng-template>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                                <nz-skeleton *ngIf="loaderConvos" class="p-2"
+                                                    [nzParagraph]="{ rows: 1 }" [nzAvatar]="'true'" [nzLoading]="'true'"
+                                                    [nzActive]="'true'">
+                                                </nz-skeleton>
+
+                                            </nz-collapse-panel>
+                                        </nz-collapse>
+                                    </div>
+                                    <ng-template #otherAgentheader class="section-header text-uppercase text-muted-ex ">
+                                        <i nz-icon [nzType]="'check-circle'" [nzTheme]="'twotone'"
+                                            [nzTwotoneColor]="'#52c41a'"></i>
+                                        <span style="padding-left: 8px;">Other Agent's converastions</span>
+                                    </ng-template>
+                                    <nz-collapse [nzExpandIconPosition]="'right'" [nzAccordion]="'true'"
+                                        class="text-muted-ex collapse-header">
+                                        <nz-collapse-panel [nzHeader]="otherAgentheader"
+                                            [nzExpandedIcon]="'right-circle'" [nzActive]="'active'">
+
+                                            <div class="section-content" *ngIf="!loaderConvos">
+                                                <div class="each-conversation pointer card-body border-bottom"
+                                                    [@fadeInOut] *ngFor="let user of otherAgentConvos;let i=index "
+                                                    [class.active-conversation]="activeuser && activeuser.user&& (user.conversationID==activeuser.conversationID)"
+                                                    (click)="showOtherAgent(user)">
+                                                    <div nz-row>
+                                                        <div nz-col nzSpan="4" class="closed">
+                                                            <nz-avatar nzText="{{user.user.name| getfirstletter }}"
+                                                                [style.backgroundColor]="user.profile" nzSize="large">
+                                                            </nz-avatar>
+                                                        </div>
+                                                        <div nz-col nzSpan="18">
+                                                            <div nz-row>
+                                                                <div nz-col nzSpan="14" class="user-name text-truncation" nz-tooltip
+                                                                    [nzTooltipTitle]=user.agent.name>
+                                                                    <strong> Agent : </strong>{{user.agent.name}}
+                                                                </div>
+                                                                <div nz-col nzSpan="10"
+                                                                    style=" text-align-last: right;">
+                                                                    <span class="text-muted-ex small">{{user.requestAt|
+                                                                        date:'short'}}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div nz-row>
+                                                                <div nz-col nzSpan="24">
+                                                                    <div nz-tooltip [nzTooltipTitle]=user.user.name
+                                                                        class="user-email text-truncation">
+                                                                        <strong> User :
+                                                                        </strong> {{user.user.name}}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div nz-col nzSpan="2" class="closed">
+                                                            <span class="px-1 pointer" nz-popover
+                                                                [nzPopoverContent]="contentTemplate"
+                                                                nzPopoverTrigger="click"
+                                                                nzPopoverPlacement="rightBottom">
+                                                                <i nz-icon nzType="more"></i>
+                                                            </span>
+                                                            <ng-template #contentTemplate>
+                                                                <div>
+                                                                    <!-- <div class="each-option pointer mt-2"
+                                                                        (click)="refresh(user)"><i
+                                                                            nz-icon nzType="reload"
+                                                                            class="mr-2"></i>
+                                                                        Refresh</div> -->
+                                                                    <div class="each-option pointer mt-2"
+                                                                        (click)="archiveUser(user)"><i nz-icon
+                                                                            nzType="up-circle" class="mr-2"></i>
+                                                                        archive</div>
+                                                                </div>
+                                                            </ng-template>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <nz-skeleton *ngIf="loaderConvos" class="p-2" [nzParagraph]="{ rows: 1 }"
+                                                [nzAvatar]="'true'" [nzLoading]="'true'" [nzActive]="'true'">
+                                            </nz-skeleton>
+
+                                        </nz-collapse-panel>
+                                    </nz-collapse>
+                                    <ng-template #queueheader class="section-header text-uppercase text-muted-ex ">
+                                        <div class="section-header text-muted-ex">
+
+                                            <i style="color:orangered" nz-icon nzType="usergroup-add"
+                                                nzTheme="outline"></i>
+                                            <span style="padding-left: 8px;">Queued converastions</span>
+                                            <!-- Conversations -->
+                                            <nz-badge style="top:-4px" [nzCount]="newlist.length"
+                                                class="site-badge-count-200"
+                                                [nzStyle]="{ backgroundColor: '#ff4d4f', color: '#fff' }">
+                                            </nz-badge>
+                                        </div>
+                                    </ng-template>
+                                    <nz-collapse [nzExpandIconPosition]="'right'" class="text-muted-ex collapse-header">
+
+                                        <nz-collapse-panel [nzHeader]="queueheader" [nzExpandedIcon]="'right-circle'"
+                                            style="color:orangered" [nzActive]="'active'">
+                                            <div class="section-wrapper queued-converastions-section"
+                                                *ngIf="!loaderConvos">
+                                                <nz-empty *ngIf="newlist.length==0"
+                                                    nzNotFoundContent="No new requests yet">
+                                                </nz-empty>
+                                                <div class="section-content">
+                                                    <div class="each-conversation pointer card-body border-bottom"
+                                                        *ngFor="let user of newlist">
+                                                        <div nz-row>
+                                                            <div nz-col nzSpan="4" class="closed">
+                                                                <nz-avatar nzText="{{user.user.name| getfirstletter }}"
+                                                                    [style.backgroundColor]="user.profile"
+                                                                    nzSize="large">
+                                                                </nz-avatar>
+                                                            </div>
+                                                            <div nz-col nzSpan="18" (click)="show(user)">
+                                                                <div nz-row>
+                                                                    <div nz-col nzSpan="14" class="user-name text-truncation" nz-tooltip
+                                                                        [nzTooltipTitle]=user.user.name>
+                                                                        <strong>{{user.user.name}}
+                                                                          
+                                                                        </strong>
+                                                                    </div>
+
+                                                                    <div nz-col nzSpan="10"
+                                                                        style=" text-align-last: right;">
+                                                                        <span
+                                                                            class="text-muted-ex small">{{user.requestAt|
+                                                                            date:'short'}}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div nz-row>
+                                                                    <div nz-col nzSpan="24">
+                                                                        <div nz-tooltip [nzTooltipTitle]=user.user.id
+                                                                            class="user-email text-truncation">
+                                                                            {{user.user.id}}
+
+                                                                        </div>
+
+
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                            <div nz-col nzSpan="2" class="closed">
+                                                                <span class="px-1 pointer" nz-popover
+                                                                    [nzPopoverContent]="contentTemplate"
+                                                                    nzPopoverTrigger="click"
+                                                                    nzPopoverPlacement="rightBottom">
+                                                                    <i nz-icon nzType="more"></i>
+                                                                </span>
+                                                                <ng-template #contentTemplate>
+                                                                    <div>
+                                                                        <div class="each-option pointer mt-2"
+                                                                            (click)="transfer(user)"><i nz-icon
+                                                                                nzType="send" class="mr-2"></i>
+                                                                            Transfer</div>
+                                                                        <!-- <div class="each-option pointer mt-2"
+                                                                            (click)="refresh(user)"><i nz-icon
+                                                                                nzType="reload"
+                                                                                class="mr-2"></i>
+                                                                            Refresh</div> -->
+                                                                        <div (click)="enduser(user,i)"
+                                                                            class="each-option pointer mt-2 text-danger">
+                                                                            <i nz-icon nzType="poweroff"
+                                                                                class="mr-2"></i>
+                                                                            End
+                                                                        </div>
+                                                                    </div>
+                                                                </ng-template>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <ng-template #contentTemplate>
+                                                <div>
+                                                    <div class="each-option pointer mt-2" (click)="transfer(user)"><i
+                                                            nz-icon nzType="send" class="mr-2"></i>
+                                                        Transfer</div>
+                                                    <!-- <div class="each-option pointer mt-2"
+                                                        (click)="refresh(user)"><i nz-icon
+                                                            nzType="reload"
+                                                            class="mr-2"></i>
+                                                        Refresh</div> -->
+                                                    <div (click)="enduser(user)"
+                                                        class="each-option pointer mt-2 text-danger">
+                                                        <i nz-icon nzType="poweroff" class="mr-2"></i>
+                                                        End
+                                                    </div>
+                                                </div>
+                                            </ng-template>
+
+                                            <nz-skeleton *ngIf="loaderConvos" class="p-2" [nzParagraph]="{ rows: 1 }"
+                                                [nzAvatar]="'true'" [nzLoading]="'true'" [nzActive]="'true'">
+                                            </nz-skeleton>
+
+                                        </nz-collapse-panel>
+                                    </nz-collapse>
+
+
+                                </nz-tab>
+                                <nz-tab nzTitle="Closed" (nzClick)="clear()" (nzSelect)="selectedTab('Closed')">
+                                    <div class="section-wrapper ongoing-converastions-section">
+                                        <ng-template #closeheader class="section-header text-uppercase text-muted-ex ">
+                                            <div class="text-muted-ex">
+                                                <i nz-icon nzType="close-circle" style="color:rgba(235, 121, 27, 0.712)"
+                                                    nzTheme="outline"></i>
+
+                                                <span style="padding-left: 8px;">Closed converastions</span>
+                                            </div>
+
+                                        </ng-template>
+                                        <nz-collapse [nzExpandIconPosition]="'right'"
+                                            class="text-muted-ex collapse-header">
+                                            <nz-collapse-panel [nzHeader]="closeheader"
+                                                [nzExpandedIcon]="'right-circle'" style="color:orangered"
+                                                [nzActive]="'active'">
+                                                <div class="section-wrapper queued-converastions-section"
+                                                    *ngIf="!loaderConvos">
+                                                    <nz-empty *ngIf="completed.length==0"
+                                                        nzNotFoundContent="No closed converastions yet">
+                                                    </nz-empty>
+                                                    <span *ngFor="let user of completed ;let i=index">
+                                                        <div class="section-content"
+                                                            *ngIf="myprofile.userId==user.agent.id"
+                                                            (click)="show(user)">
+
+                                                            <div class="each-conversation pointer card-body border-bottom"
+                                                                [class.active-conversation]="activeuser && activeuser.user&& (user.conversationID==activeuser.conversationID)">
+                                                                <div nz-row>
+                                                                    <div nz-col nzSpan="4" class="closed">
+                                                                        <nz-avatar
+                                                                            nzText="{{user.user.name| getfirstletter }}"
+                                                                            [style.backgroundColor]="user.profile"
+                                                                            nzSize="large">
+                                                                        </nz-avatar>
+                                                                    </div>
+                                                                    <div nz-col nzSpan="18">
+                                                                        <div nz-row>
+                                                                            <div nz-col nzSpan="14" class="user-name text-truncation"
+                                                                                nz-tooltip
+                                                                                [nzTooltipTitle]=user.user.name>
+                                                                                <strong>{{user.user.name}}
+                                                                                   
+                                                                                </strong>
+                                                                            </div>
+
+                                                                            <div nz-col nzSpan="10"
+                                                                                style=" text-align-last: right;">
+                                                                                <span
+                                                                                    class="text-muted-ex small">{{user.requestAt|
+                                                                                    date:'short'}}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div nz-row>
+                                                                            <div nz-col nzSpan="24">
+                                                                                <div nz-tooltip
+                                                                                    [nzTooltipTitle]=user.user.id
+                                                                                    class="user-email text-truncation">
+                                                                                    {{user.user.id}}
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div nz-col nzSpan="2" class="closed">
+                                                                        <span class="px-1 pointer" nz-popover
+                                                                            [nzPopoverContent]="contentTemplate"
+                                                                            nzPopoverTrigger="click"
+                                                                            nzPopoverPlacement="rightBottom">
+                                                                            <i nz-icon nzType="more"></i>
+                                                                        </span>
+                                                                        <ng-template #contentTemplate>
+                                                                            <div>
+
+                                                                                <div class="each-option pointer mt-2"
+                                                                                    (click)="archiveUser(user)"><i
+                                                                                        nz-icon nzType="up-circle"
+                                                                                        class="mr-2"></i>
+                                                                                    archive</div>
+                                                                            </div>
+                                                                        </ng-template>
+                                                                    </div>
+                                                                </div>
+                                                                <!-- <div nz-row *ngIf="myprofile.userId!=user.agent.id">
+                                                                <div nz-col nzSpan="4" class="closed">
+                                                                    <nz-avatar
+                                                                        nzText="{{user.user.name| getfirstletter }}"
+                                                                        [style.backgroundColor]="user.profile"
+                                                                        nzSize="large">
+                                                                    </nz-avatar>
+                                                                </div>
+                                                                <div nz-col nzSpan="18">
+                                                                    <div nz-row>
+                                                                        <div nz-col nzSpan="14" class="user-name text-truncation"
+                                                                            nz-tooltip [nzTooltipTitle]=user.agent.name>
+                                                                            <strong> Agent :
+
+                                                                            </strong>{{user.agent.name.slice(0,10)}}
+                                                                            <span *ngIf="user.agent.name.length>10">..
+                                                                            </span>
+                                                                        </div>
+                                                                        <div nz-col nzSpan="10"
+                                                                            style=" text-align-last: right;">
+                                                                            <span
+                                                                                class="text-muted-ex small">{{user.requestAt|
+                                                                                date:'short'}}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div nz-row>
+                                                                        <div nz-col nzSpan="24">
+                                                                            <div nz-tooltip
+                                                                                [nzTooltipTitle]=user.user.id
+                                                                                class="user-email text-truncation">
+                                                                                <strong> User :
+                                                                                </strong>
+                                                                                {{user.user.name.slice(0,30)}}<span
+                                                                                    *ngIf="user.user.id.length>30">...
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div nz-col nzSpan="2" class="closed">
+                                                                    <span class="px-1 pointer" nz-popover
+                                                                        [nzPopoverContent]="contentTemplate"
+                                                                        nzPopoverTrigger="click"
+                                                                        nzPopoverPlacement="rightBottom">
+                                                                        <i nz-icon nzType="more"></i>
+                                                                    </span>
+                                                                    <ng-template #contentTemplate>
+                                                                        <div>
+                                                                           
+                                                                            <div class="each-option pointer mt-2"
+                                                                                (click)="archiveUser(user)"><i nz-icon
+                                                                                    nzType="up-circle" class="mr-2"></i>
+                                                                                archive</div>
+                                                                        </div>
+                                                                    </ng-template>
+                                                                </div>
+                                                            </div> -->
+                                                            </div>
+                                                        </div>
+                                                    </span>
+                                                </div>
+                                                <nz-skeleton *ngIf="loaderConvos" class="p-2"
+                                                    [nzParagraph]="{ rows: 1 }" [nzAvatar]="'true'" [nzLoading]="'true'"
+                                                    [nzActive]="'true'">
+                                                </nz-skeleton>
+                                            </nz-collapse-panel>
+                                        </nz-collapse>
+
+                                    </div>
+                                    <ng-template #otherAgentcloseheader
+                                        class="section-header text-uppercase text-muted-ex ">
+                                        <i nz-icon [nzType]="'close-circle'" [nzTheme]="'twotone'"
+                                            [nzTwotoneColor]="'orangered'"></i>
+                                        <span style="padding-left: 8px;">Other Agent's converastions</span>
+                                    </ng-template>
+                                    <nz-collapse [nzExpandIconPosition]="'right'" [nzAccordion]="'true'"
+                                        class="text-muted-ex collapse-header">
+                                        <nz-collapse-panel [nzHeader]="otherAgentcloseheader"
+                                            [nzExpandedIcon]="'right-circle'" [nzActive]="'active'">
+
+                                            <div class="section-content" *ngIf="!loaderConvos"
+                                                (scroll)="onScroll($event)">
+                                                <span *ngFor="let user of completed;let i=index "
+                                                    (click)="showOtherAgent(user)">
+                                                    <div class="each-conversation pointer card-body border-bottom"
+                                                        [@fadeInOut] *ngIf="myprofile.userId!=user.agent.id"
+                                                        [class.active-conversation]="activeuser && activeuser.user&& (user.conversationID==activeuser.conversationID)">
+                                                        <div nz-row>
+                                                            <div nz-col nzSpan="4" class="closed">
+                                                                <nz-avatar nzText="{{user.user.name| getfirstletter }}"
+                                                                    [style.backgroundColor]="user.profile"
+                                                                    nzSize="large">
+                                                                </nz-avatar>
+                                                            </div>
+                                                            <div nz-col nzSpan="18">
+                                                                <div nz-row>
+                                                                    <div nz-col nzSpan="14" class="user-name text-truncation" nz-tooltip
+                                                                        [nzTooltipTitle]=user.agent.name>
+                                                                        <strong> Agent :
+
+
+                                                                        </strong>{{user.agent.name}} 
+                                                                    </div>
+                                                                    <div nz-col nzSpan="10"
+                                                                        style=" text-align-last: right;">
+                                                                        <span
+                                                                            class="text-muted-ex small">{{user.requestAt|
+                                                                            date:'short'}}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div nz-row>
+                                                                    <div nz-col nzSpan="24">
+                                                                        <div nz-tooltip [nzTooltipTitle]=user.user.name
+                                                                            class="user-email text-truncation">
+                                                                            <strong> User :
+                                                                            </strong>
+                                                                            {{user.user.name}}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div nz-col nzSpan="2" class="closed">
+                                                                <!-- <span class="px-1 pointer" nz-popover
+                                                                [nzPopoverContent]="contentTemplate"
+                                                                nzPopoverTrigger="click"
+                                                                nzPopoverPlacement="rightBottom">
+                                                                <i nz-icon nzType="more"></i>
+                                                            </span> -->
+                                                                <ng-template #contentTemplate>
+                                                                    <div>
+
+                                                                        <div class="each-option pointer mt-2"
+                                                                            (click)="archiveUser(user)"><i nz-icon
+                                                                                nzType="up-circle" class="mr-2"></i>
+                                                                            archive</div>
+                                                                    </div>
+                                                                </ng-template>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </span>
+                                            </div>
+                                            <nz-skeleton *ngIf="loaderConvos" class="p-2" [nzParagraph]="{ rows: 1 }"
+                                                [nzAvatar]="'true'" [nzLoading]="'true'" [nzActive]="'true'">
+                                            </nz-skeleton>
+
+                                        </nz-collapse-panel>
+                                    </nz-collapse>
+                                    <ng-template #abandonedheader class="section-header text-uppercase text-muted-ex ">
+                                        <div class="text-muted-ex">
+                                            <i nz-icon nzType="stop" style="color:rgb(243, 49, 49)"
+                                                nzTheme="outline"></i>
+
+                                            <span style="padding-left: 8px;">Abandoned converastions</span>
+                                        </div>
+
+                                    </ng-template>
+                                    <nz-collapse [nzExpandIconPosition]="'right'" class="text-muted-ex collapse-header">
+
+                                        <nz-collapse-panel [nzHeader]="abandonedheader"
+                                            [nzExpandedIcon]="'right-circle'" style="color:orangered"
+                                            [nzActive]="'active'">
+                                            <div class="section-wrapper queued-converastions-section"
+                                                *ngIf="!loaderConvos">
+                                                <nz-empty *ngIf="abandoned.length==0"
+                                                    nzNotFoundContent="No abandoned converastions yet">
+                                                </nz-empty>
+                                                <div class="section-content">
+
+                                                    <div class="each-conversation pointer card-body border-bottom"
+                                                        *ngFor="let user of abandoned ;let i=index" (click)="show(user)"
+                                                        [class.active-conversation]="activeuser && activeuser.user&& (user.conversationID==activeuser.conversationID)">
+                                                        <div nz-row>
+                                                            <div nz-col nzSpan="4" class="closed">
+                                                                <nz-avatar nzText="{{user.user.name| getfirstletter }}"
+                                                                    [style.backgroundColor]="user.profile"
+                                                                    nzSize="large">
+                                                                </nz-avatar>
+                                                            </div>
+                                                            <div nz-col nzSpan="18">
+                                                                <div nz-row>
+                                                                    <div nz-col nzSpan="14" class="user-name text-truncation" nz-tooltip
+                                                                        [nzTooltipTitle]=user.user.name>
+                                                                        <strong>{{user.user.name}}
+                                                                           
+                                                                        </strong>
+                                                                    </div>
+
+                                                                    <div nz-col nzSpan="10"
+                                                                        style=" text-align-last: right;">
+                                                                        <span
+                                                                            class="text-muted-ex small">{{user.requestAt|
+                                                                            date:'short'}}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div nz-row>
+                                                                    <div nz-col nzSpan="24">
+                                                                        <div nz-tooltip [nzTooltipTitle]=user.user.id
+                                                                            class="user-email text-truncation">
+                                                                            {{user.user.id}}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div nz-col nzSpan="2" class="closed">
+                                                                <span class="px-1 pointer" nz-popover
+                                                                    [nzPopoverContent]="contentTemplate"
+                                                                    nzPopoverTrigger="click"
+                                                                    nzPopoverPlacement="rightBottom">
+                                                                    <i nz-icon nzType="more"></i>
+                                                                </span>
+                                                                <ng-template #contentTemplate>
+                                                                    <div>
+                                                                        <!-- <div class="each-option pointer mt-2"
+                                                                            (click)="refresh(user)"><i
+                                                                                nz-icon nzType="reload"
+                                                                                class="mr-2"></i>
+                                                                            Refresh</div> -->
+                                                                        <div class="each-option pointer mt-2"
+                                                                            (click)="archiveUser(user)"><i nz-icon
+                                                                                nzType="up-circle" class="mr-2"></i>
+                                                                            archive</div>
+                                                                    </div>
+                                                                </ng-template>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <nz-skeleton *ngIf="loaderConvos" class="p-2" [nzParagraph]="{ rows: 1 }"
+                                                [nzAvatar]="'true'" [nzLoading]="'true'" [nzActive]="'true'">
+                                            </nz-skeleton>
+                                        </nz-collapse-panel>
+                                    </nz-collapse>
+                                </nz-tab>
+                                <nz-tab nzTitle="Archived" (nzClick)="clear()" (nzSelect)="selectedTab('Archived')">
+                                    <div class="section-wrapper ongoing-converastions-section">
+                                        <ng-template #archiveheader
+                                            class="section-header text-uppercase text-muted-ex ">
+                                            <div class="text-muted-ex">
+                                                <i nz-icon nzType="file-zip" style="color:dodgerblue"
+                                                    nzTheme="outline"></i>
+
+                                                <span style="padding-left: 8px;">Archived converastions</span>
+                                            </div>
+
+                                        </ng-template>
+                                        <nz-collapse [nzExpandIconPosition]="'right'"
+                                            class="text-muted-ex collapse-header">
+
+                                            <nz-collapse-panel [nzHeader]="archiveheader"
+                                                [nzExpandedIcon]="'right-circle'" style="color:orangered"
+                                                [nzActive]="'active'">
+                                                <div class="section-wrapper queued-converastions-section"
+                                                    *ngIf="!loaderConvos">
+                                                    <nz-empty *ngIf="archive.length==0"
+                                                        nzNotFoundContent="No archive converastions yet">
+                                                    </nz-empty>
+                                                    <div class="section-content">
+
+                                                        <div class="each-conversation pointer card-body border-bottom"
+                                                            *ngFor="let user of archive ;let i=index"
+                                                            (click)="show(user)"
+                                                            [class.active-conversation]="activeuser && activeuser.user&& (user.conversationID==activeuser.conversationID)">
+                                                            <div nz-row>
+                                                                <div nz-col nzSpan="4" class="closed">
+                                                                    <nz-avatar
+                                                                        nzText="{{user.user.name| getfirstletter }}"
+                                                                        [style.backgroundColor]="user.profile"
+                                                                        nzSize="large">
+                                                                    </nz-avatar>
+                                                                </div>
+                                                                <div nz-col nzSpan="18">
+                                                                    <div nz-row>
+                                                                        <div nz-col nzSpan="14" class="user-name text-truncation"
+                                                                            nz-tooltip [nzTooltipTitle]=user.user.name>
+                                                                            <strong>{{user.user.name}}
+                                                                               
+                                                                            </strong>
+                                                                        </div>
+
+                                                                        <div nz-col nzSpan="10"
+                                                                            style=" text-align-last: right;">
+                                                                            <span
+                                                                                class="text-muted-ex small">{{user.requestAt|
+                                                                                date:'short'}}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div nz-row>
+                                                                        <div nz-col nzSpan="24">
+                                                                            <div nz-tooltip
+                                                                                [nzTooltipTitle]=user.user.id
+                                                                                class="user-email text-truncation">
+                                                                                {{user.user.id}}
+                                                                                
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div nz-col nzSpan="2" class="closed">
+                                                                    <span class="px-1 pointer" nz-popover
+                                                                        [nzPopoverContent]="contentTemplate"
+                                                                        nzPopoverTrigger="click"
+                                                                        nzPopoverPlacement="rightBottom">
+                                                                        <i nz-icon nzType="more"></i>
+                                                                    </span>
+                                                                    <ng-template #contentTemplate>
+                                                                        <div>
+                                                                            <!-- <div class="each-option pointer mt-2"
+                                                                                (click)="refresh(user)"><i
+                                                                                    nz-icon nzType="reload"
+                                                                                    class="mr-2"></i>
+                                                                                Refresh</div> -->
+                                                                            <div class="each-option pointer mt-2"
+                                                                                (click)="unArchiveUser(user)"><i nz-icon
+                                                                                    nzType="up-circle" class="mr-2"></i>
+                                                                                Unarchive</div>
+                                                                        </div>
+                                                                    </ng-template>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <nz-skeleton *ngIf="loaderConvos" class="p-2"
+                                                    [nzParagraph]="{ rows: 1 }" [nzAvatar]="'true'" [nzLoading]="'true'"
+                                                    [nzActive]="'true'">
+                                                </nz-skeleton>
+                                            </nz-collapse-panel>
+                                        </nz-collapse>
+                                    </div>
+                                    <ng-template #starheader class="section-header text-uppercase text-muted-ex ">
+                                        <div class="text-muted-ex">
+                                            <i nz-icon nzType="star" style="color:rgba(253, 152, 0, 0.842)"
+                                                nzTheme="outline"></i>
+
+                                            <span style="padding-left: 8px;">Starred converastions</span>
+                                        </div>
+
+                                    </ng-template>
+                                    <nz-collapse [nzExpandIconPosition]="'right'" class="text-muted-ex collapse-header">
+
+                                        <nz-collapse-panel [nzHeader]="starheader" [nzExpandedIcon]="'right-circle'"
+                                            style="color:orangered" [nzActive]="'active'">
+                                            <div class="section-wrapper queued-converastions-section"
+                                                *ngIf="!loaderConvos">
+                                                <nz-empty *ngIf="starred.length==0"
+                                                    nzNotFoundContent="No starred converastions yet">
+                                                </nz-empty>
+                                                <div class="section-content">
+
+                                                    <div class="each-conversation pointer card-body border-bottom"
+                                                        *ngFor="let user of starred ;let i=index" (click)="show(user)"
+                                                        [class.active-conversation]="activeuser && activeuser.user&& (user.conversationID==activeuser.conversationID)">
+                                                        <div nz-row>
+                                                            <div nz-col nzSpan="4" class="closed">
+                                                                <nz-avatar nzText="{{user.user.name| getfirstletter }}"
+                                                                    [style.backgroundColor]="user.profile"
+                                                                    nzSize="large">
+                                                                </nz-avatar>
+                                                            </div>
+                                                            <div nz-col nzSpan="18">
+                                                                <div nz-row>
+                                                                    <div nz-col nzSpan="14" class="user-name text-truncation" nz-tooltip
+                                                                        [nzTooltipTitle]=user.user.name>
+                                                                        <strong>{{user.user.name}}
+                                                                           
+                                                                        </strong>
+                                                                    </div>
+
+                                                                    <div nz-col nzSpan="10"
+                                                                        style=" text-align-last: right;">
+                                                                        <span
+                                                                            class="text-muted-ex small">{{user.requestAt|
+                                                                            date:'short'}}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div nz-row>
+                                                                    <div nz-col nzSpan="24">
+                                                                        <div nz-tooltip [nzTooltipTitle]=user.user.id
+                                                                            class="user-email text-truncation">
+                                                                            {{user.user.id}}
+                                                                          
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div nz-col nzSpan="2" class="closed">
+                                                                <span class="px-1 pointer" nz-popover
+                                                                    [nzPopoverContent]="contentTemplate"
+                                                                    nzPopoverTrigger="click"
+                                                                    nzPopoverPlacement="rightBottom">
+                                                                    <i nz-icon nzType="more"></i>
+                                                                </span>
+                                                                <ng-template #contentTemplate>
+                                                                    <div>
+                                                                        <!-- <div class="each-option pointer mt-2"
+                                                                            (click)="refresh(user)"><i
+                                                                                nz-icon nzType="reload"
+                                                                                class="mr-2"></i>
+                                                                            Refresh</div> -->
+                                                                        <div class="each-option pointer mt-2"
+                                                                            (click)="unArchiveUser(user)"><i nz-icon
+                                                                                nzType="up-circle" class="mr-2"></i>
+                                                                            Unarchive</div>
+                                                                    </div>
+                                                                </ng-template>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <nz-skeleton *ngIf="loaderConvos" class="p-2" [nzParagraph]="{ rows: 1 }"
+                                                [nzAvatar]="'true'" [nzLoading]="'true'" [nzActive]="'true'">
+                                            </nz-skeleton>
+                                        </nz-collapse-panel>
+                                    </nz-collapse>
+                                </nz-tab>
+                            </nz-tabset>
+                        </div>
+
+                    </div>
+
+                    <div nz-col [nzSpan]="viewTicket?12:18" [style.border-right]="viewTicket ? 'inset' : 'unset'"
+                        class="border-bottom">
+                        <div class="right-section-topbar">
+                            <div class="card-body border-bottom d-flex">
+                                <div class="user-name text-truncation" *ngIf="activeuser && activeuser.user">
+                                    {{activeuser.user.name}} | <span style="color: gray;">{{activeuser.channel}}</span>
+                                </div>
+
+                                <div class="ml-auto options d-flex">
+                                    <div class="converation-search mr-2">
+                                        <nz-input-group [nzSuffix]="suffixIconSearch">
+                                            <input type="text" nz-input placeholder="Search Messages"
+                                                (keydown.enter)="searchMessage()"
+                                                [disabled]="!(activeuser && activeuser.user)"
+                                                [(ngModel)]="searchText" />
+                                        </nz-input-group>
+                                        <ng-template #suffixIconSearch>
+                                            <i nz-icon nzType="search" (click)="searchMessage()"></i>
+                                        </ng-template>
+                                    </div>
+                                    <div class="conversation-actions border-left px-3 ml-4">
+                                        <i nz-tooltip
+                                            [class.disabled]="!(activeuser && activeuser.user && activeuser.agent && activeuser.agent.id==myprofile.userId&&activeuser.status=='Accepted') "
+                                            nzTooltipTitle="Transfer" nz-icon nzType="send" (click)="open();getList()"
+                                            class="mx-3 pointer"></i>
+
+                                        <!-- <button nz-button nzType="primary" (click)="open()">Open</button> -->
+                                        <nz-drawer [nzClosable]="false" [nzVisible]="visible" nzPlacement="right"
+                                            [nzWidth]="300" class="drawer" nzTitle="Agents List - Online Users"
+                                            (nzOnClose)="close()" style="padding: 0px;">
+                                            <div style="display: flex;justify-content: center; height: 70vh; align-items: center;"
+                                                *ngIf="loader">
+                                                <nz-spin [nzSpinning]="'true'" nzSimple [nzSize]="'large'"></nz-spin>
+                                            </div>
+                                            <!-- <span *ngIf="!loader && agentList.length==0"> -->
+                                            <span>
+                                                <div style="display: flex;justify-content: center; height: 70vh; align-items: center;"
+                                                    *ngIf="!loader && agentList.length==0">
+                                                    Agents are not available
+                                                </div>
+
+                                            </span>
+                                            <span *ngIf="!loader && agentList.length>0">
+                                                <div nz-row *ngFor="let agent of agentList">
+                                                    <div nz-col nzSpan="20" class="transfer-agent"
+                                                        (click)="transferTo(agent)">
+                                                        <span>
+                                                            {{agent.fullName}}
+                                                            <nz-badge nz-tooltip
+                                                                [nzTooltipTitle]="agent.status==='Online'?'Online':agent.status==='Busy'?'Busy':agent.status==='Offline'?'default':'Offline'"
+                                                                [nzStatus]="agent.status==='Online'?'success':agent.status==='Busy'?'error':agent.status==='Offline'?'default':'warning'">
+                                                            </nz-badge>
+                                                            <div class="user-name text-truncation">
+                                                                <strong>{{agent.email}}</strong>
+                                                            </div>
+                                                        </span>
+                                                    </div>
+                                                    <div nz-col nzSpan="4"
+                                                        style="display: flex;align-items: center;background: whitesmoke;">
+                                                        <nz-badge nzStandalone [nzCount]="agent.count"
+                                                            [nzStyle]="{ backgroundColor: '#52c41a' }"></nz-badge>
+
+                                                    </div>
+                                                    <nz-divider style="margin: 2px;"></nz-divider>
+                                                </div>
+                                            </span>
+
+                                        </nz-drawer>
+                                        <!-- <i [class.disabled]="!(activeuser && activeuser.user &&( activeuser.status=='Accepted'))"
+                                            nz-tooltip nzTooltipTitle="Refresh Chat" nz-icon nzType="reload"
+                                            class="mx-3 pointer" (click)="refresh(activeuser)"></i>  -->
+                                        <i [class.disabled]="(activeuser && activeuser.incidentId==null)||!(activeuser && activeuser.user&& activeuser.agent &&( activeuser.status=='Accepted') &&( activeuser.agent.id==myprofile.userId))"
+                                            nz-tooltip nzTooltipTitle="Ticket Info" nz-icon nzType="info-circle"
+                                            class="mx-3 pointer" (click)="onviewInfo()"></i>
+
+                                        <i [class.disabled]="!(activeuser && activeuser.user&& activeuser.agent &&( activeuser.status=='Accepted') &&( activeuser.agent.id==myprofile.userId))"
+                                            nz-tooltip nzTooltipTitle="End Chat" nz-icon nzType="poweroff"
+                                            class="mx-3 pointer text-danger" (click)="showConfirm()"></i>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <!-- <div>
+                            <label (click)="onviewInfo()" class="viewInfo" nz-radio-button nzValue="default">Click here to see the ticket information</label>
+                        </div> -->
+                        <div style="text-align: center;margin: 40vh;height: 100%;" *ngIf="transcriptLoader">
+                            <nz-spin [nzSpinning]="'true'" nzSimple [nzSize]="'large'"></nz-spin>
+                        </div>
+
+
+                        <div style="text-align: center;margin: 40vh;height: 100%;"
+                            *ngIf="!(activeuser && activeuser.user)">
+                            <p style=" margin-left: 25%;color: rgb(65, 54, 54);width: max-content;">Select user to view
+                                conversation</p>
+                            <!-- <div style="width: 200px;height:25px;color:black;border:1px solid red">
+                                <span contenteditable="true" [textContent]="model"
+                                    (input)="model=$event.target.textContent"></span><span style="color:grey"
+                                    *ngIf="model">{{suggested.slice(model.length,suggested.length)}}</span>
+                            </div> -->
+                        </div>
+                        <div class="right-section-content right-section-content-scroll-height"
+                            *ngIf="!transcriptLoader">
+
+                            <div class="chat-section border-bottom pt-1" #scrollMe [scrollTop]="scrollMe.scrollHeight">
+
+                                <div class="chat-display card-body" *ngIf="activeuser">
+
+                                    <span *ngFor="let msg of activeuser.transcript | messagefilter:searchText">
+                                        <div class="chat-row each-bubble" *ngIf="msg.origin=='bot' && msg.text">
+                                            <div id={{msg.text}} class="chat-bubble d-flex bot">
+                                                <div class="card-body message-text">
+                                                    {{msg.text}}
+                                                </div>
+                                            </div>
+                                            <div class="chat-bubble bot-label mt-1">
+                                                <strong>- Bot</strong> | <span class="message-time text-muted">
+                                                    {{msg.timestamp |
+                                                    date:'shortTime'}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="chat-row each-bubble"
+                                            *ngIf="(msg.origin=='user' || msg.aadObjectId) && msg.text">
+                                            <div id={{msg.text}} class="chat-bubble d-flex user">
+                                                <div class="card-body message-text">
+                                                    {{msg.text}}
+                                                </div>
+                                            </div>
+                                            <div class="chat-bubble user-label mt-1">
+                                                <strong>- {{activeuser.user.name}}</strong> | <span
+                                                    class="message-time text-muted">{{msg.timestamp |
+                                                    date:'shortTime'}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="chat-row each-bubble" *ngIf="msg.origin=='agent' && msg.text">
+                                            <div id={{msg.text}} class="chat-bubble d-flex agent">
+                                                <div class="card-body message-text">
+                                                    {{msg.text}}
+                                                </div>
+                                            </div>
+                                            <div class="chat-bubble agent-label mt-1">
+                                                <strong>- {{msg.user.name}}</strong> | <span
+                                                    class="message-time text-muted">{{msg.timestamp |
+                                                    date:'shortTime'}}</span>
+                                            </div>
+                                        </div>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="chat-input" *ngIf="activeuser">
+                                <div *ngIf="activeuser.status=='Requested'">
+                                    <button class="accept-btn" (click)="accept(activeuser)" nz-button nzType="success"
+                                        [nzSize]="size" style="background-color: #0cc27e;color: #fff;">Click here to
+                                        start the
+                                        conversation</button>
+                                </div>
+                                <div
+                                    *ngIf="activeuser&& activeuser.status!='Accepted' && activeuser.status!='Requested'&& activeuser.status!=undefined">
+                                    <button class="accept-btn" nz-button nzType="primary" nzDanger>This conversation has
+                                        ended. You can no
+                                        longer send messages to this recipient</button>
+                                </div>
+                                <div
+                                    *ngIf="activeuser.status=='Accepted' && activeuser.agent && activeuser.agent.id!=myprofile.userId">
+                                    <button class="accept-btn" nz-button nzType="primary" nzDanger>You can only view
+                                        this converastion</button>
+                                </div>
+                                <div
+                                    *ngIf="activeuser.status=='Accepted' && activeuser.transfer==null && activeuser.transferagent">
+                                    <button (click)="transferRequest()" class="accept-btn" nz-button
+                                        nzType="primary">This conversation has been transfered by
+                                        {{activeuser.transferagent.name}}. Click here to
+                                        start the conversation</button>
+                                </div>
+                                <div
+                                    *ngIf="activeuser.status=='Accepted'&&activeuser.agent&& activeuser.agent.id==myprofile.userId&& !(activeuser.status=='Accepted' && activeuser.transfer==null && activeuser.transferagent) ">
+                                    <ng-template #cascade>
+                                        <i style="width: 26px;font-size: 2rem; margin-top: 9px;" nz-icon
+                                            nzType="comment" (click)="quickResponse=!quickResponse"></i>
+                                        <!-- <nz-cascader [nzNotFoundContent]=cascade [nzOptions]="nzOptions"
+                                            [(ngModel)]="message" [nzShowSearch]="false"
+                                            (ngModelChange)="onChanges($event)" nzShowArrow=true
+                                            [nzPlaceHolder]="'Quick'" nzSize="large" nzNotFoundContent="&nbsp;"
+                                            [nzExpandTrigger]="'hover'" [nzExpandIcon]="'send'"
+                                            (keydown.enter)="sendMessage()" [nzShowInput]="true">
+                                        </nz-cascader> -->
+                                    </ng-template>
+                                    <!-- <button nz-button nzType="primary" [nzSize]="size" nzShape="round"><i nz-icon nzType="download"></i>Hi UserName</button>&nbsp;<button nz-button nzType="primary" [nzSize]="size" nzShape="round"><i nz-icon nzType="download"></i>How can i help you</button> -->
+                                    <ng-template #sendbutton>
+                                        <i nz-icon nzType="send" (click)="sendMessage()"></i>
+                                    </ng-template>
+                                    <nz-cascader [nzOptions]="nzOptions" *ngIf="quickResponse" [(ngModel)]="message"
+                                        [nzShowSearch]="true" (ngModelChange)="onChanges($event)" nzShowArrow=true
+                                        [nzPlaceHolder]="'Search or select quick response'" nzSize="large"
+                                        nzNotFoundContent="&nbsp;" [nzExpandTrigger]="'hover'" [nzExpandIcon]="'send'"
+                                        [nzShowInput]="true">
+                                    </nz-cascader>
+                                    <!-- [nzSuffix]="cascade" -->
+                                    <nz-input-group [nzSuffix]="cascade" [nzAddOnAfter]="sendbutton" class="pointer"
+                                        *ngIf="!quickResponse">
+
+                                        <input [disabled]="!(activeuser && activeuser.user)"
+                                            (keydown)="activeuser.type=true" (keyup)="activeuser.type=false" type="text"
+                                            nz-input [(ngModel)]="message" autofocus class="chat-input-text"
+                                            placeholder="Say something" (keydown.enter)="sendMessage()" />
+                                    </nz-input-group>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div nz-col [nzSpan]="viewTicket?6:0" *ngIf="activeuser && activeuser.incidentId">
+                        <div class="right-section-topbar">
+                            <div class="card-body border-bottom d-flex" style="height: 56px;">
+                                <div class="user-name text-truncation" nz-col nzSpan="22">
+                                    <span>Ticket Info - {{activeuser.incidentId}}</span>
+                                </div>
+                                <div nzSpan="2" (click)="onReset()">
+                                    <i nz-icon nzType="close" style="color:rgb(243, 49, 49);cursor: pointer;"
+                                        nzTheme="outline"></i>
+                                </div>
+
+                            </div>
+                            <div style="text-align: center;margin-top: 40vh;" *ngIf="ticketLoader">
+                                <nz-spin [nzSpinning]="'true'" nzSimple [nzSize]="'large'"></nz-spin>
+                            </div>
+                            <div class="card m-3" *ngIf="!ticketLoader">
+
+                                <div class="card-body" style="height: 80vh;overflow-y: auto;">
+                                    <!-- <input nz-input [(ngModel)]="value" [nzAutocomplete]="auto">
+                                    <nz-autocomplete #auto>
+                                      <nz-auto-option [nzValue]="'12345'">12345</nz-auto-option>
+                                      <nz-auto-option [nzValue]="'23456'">23456</nz-auto-option>
+                                      <nz-auto-option [nzValue]="'34567'">34567</nz-auto-option>
+                                    </nz-autocomplete> -->
+
+                                    <form [formGroup]="ticketForm" (ngSubmit)="onSubmit()">
+
+                                        <div class="form-group">
+                                            <label>Assigned Group</label>
+                                            <input nz-input formControlName="assignedgroup" nz-tooltip
+                                                [nzTooltipTitle]='ticketForm.value.assignedgroup' class="form-control"
+                                                list="groups" (change)="selectedAssigneeGroup($event)">
+                                            <datalist id="groups">
+                                                <option *ngFor="let value of groups"
+                                                    (change)="selectedAssigneeGroup(value.id)" id={{value.id}}
+                                                    value={{value.name}}>
+                                            </datalist>
+                                            <div *ngIf="submitted && f.assignedgroup.errors" class="invalid-feedback">
+                                                <div *ngIf="f.assignedgroup.errors.required">Assigned Group</div>
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Assignee</label>
+                                            <nz-spin [nzSpinning]="assigneeMembers.length==0" [nzDelay]="500">
+                                                <input nz-input formControlName="assigned" nz-tooltip
+                                                    [nzTooltipTitle]='ticketForm.value.assigned'
+                                                    [class.input-disabled]='assigneeMembers.length==0'
+                                                    class="form-control" list="assigneemembers">
+                                            </nz-spin>
+                                            <datalist id="assigneemembers">
+                                                <option *ngFor="let value of assigneeMembers" value={{value.name}}>
+                                            </datalist>
+                                            <div *ngIf="submitted && f.assigned.errors" class="invalid-feedback">
+                                                <div *ngIf="f.assigned.errors.required">Assigned</div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Owner Group</label>
+                                            <input nz-input formControlName="ownergroup"
+                                                (change)="selectedOwnerGroup($event)" class="form-control" nz-tooltip
+                                                [nzTooltipTitle]='ticketForm.value.ownergroup' list="ownergroups">
+                                            <datalist id="ownergroups">
+                                                <option *ngFor="let value of ownergroups"
+                                                    (change)="selectedOwnerGroup(value.id)" id={{value.id}}
+                                                    value={{value.name}}>
+                                            </datalist>
+                                            <div *ngIf="submitted && f.ownergroup.errors" class="invalid-feedback">
+                                                <div *ngIf="f.ownergroup.errors.required">Owner Group</div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Owner</label>
+                                            <nz-spin [nzSpinning]="ownerMembers.length==0" [nzDelay]="500">
+                                                <input nz-input formControlName="owner" class="form-control" nz-tooltip
+                                                    [nzTooltipTitle]='ticketForm.value.owner'
+                                                    [class.input-disabled]='ownerMembers.length==0' list="ownermembers">
+                                            </nz-spin>
+                                            <datalist id="ownermembers">
+                                                <option *ngFor="let value of ownerMembers" value={{value.name}}>
+                                            </datalist>
+                                            <div *ngIf="submitted && f.owner.errors" class="invalid-feedback">
+                                                <div *ngIf="f.owner.errors.required">Owner</div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Project ID</label>
+                                            <input nz-input formControlName="projectid" class="form-control" nz-tooltip
+                                                [nzTooltipTitle]='ticketForm.value.projectid' list="projectid">
+                                            <datalist id="projectid">
+                                                <option *ngFor="let value of projectids" value={{value}}>
+                                            </datalist>
+                                            <div *ngIf="submitted && f.projectid.errors" class="invalid-feedback">
+                                                <div *ngIf="f.projectid.errors.required">projectid is required
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <nz-divider style="margin:5px 0px;color: black;font-weight: bolder;"
+                                            nzText="Categorization"></nz-divider>
+
+
+                                        <div class="form-group">
+                                            <label>Summary</label>
+                                            <input nz-input formControlName="summary" class="form-control" nz-tooltip
+                                                [nzTooltipTitle]='ticketForm.value.summary'>
+                                            <div *ngIf="submitted && f.summary.errors" class="invalid-feedback">
+                                                <div *ngIf="f.summary.errors.required">Summary</div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Case Type</label>
+                                            <input nz-input list="casetypes" formControlName="casetype" nz-tooltip
+                                                [nzTooltipTitle]='ticketForm.value.casetype' class="form-control">
+                                            <datalist id="casetypes">
+                                                <option *ngFor="let value of casetypes" value={{value}}>
+                                            </datalist>
+
+                                            <div *ngIf="submitted && f.casetype.errors" class="invalid-feedback">
+                                                <div *ngIf="f.casetype.errors.required">casetype is required
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Priority</label>
+                                            <input nz-input formControlName="priority" class="form-control" nz-tooltip
+                                                [nzTooltipTitle]='ticketForm.value.priority' list="priority">
+                                            <datalist id="priority">
+                                                <option *ngFor="let value of priorities" value={{value}}>
+                                            </datalist>
+
+                                            <div *ngIf="submitted && f.priority.errors" class="invalid-feedback">
+                                                <div *ngIf="f.priority.errors.required">Priority is required
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Categorization Tier</label>
+                                            <input nz-input formControlName="categorization" class="form-control"
+                                                nz-tooltip [nzTooltipTitle]='ticketForm.value.categorization'
+                                                list="categorization">
+                                            <datalist id="categorization">
+                                                <option *ngFor="let value of categories" value={{value}}>
+                                            </datalist>
+
+
+                                            <div *ngIf="submitted && f.categorization.errors" class="invalid-feedback">
+                                                <div *ngIf="f.categorization.errors.required">Categorization is
+                                                    required</div>
+                                            </div>
+                                        </div>
+
+                                        <nz-divider style="margin:5px 0px;color: black;font-weight: bolder;"
+                                            nzText="SAP"></nz-divider>
+                                        <small style="color: red;display: flex;justify-content: center;">**Note :
+                                            Complete these fields when Closing the Ticket</small>
+                                        <nz-divider style="margin:5px 0px" nzPlain></nz-divider>
+
+                                        <!-- <div class="form-group">
+                                            <label>SAP Cause</label>
+                                            <input nz-input formControlName="sapcause" class="form-control" nz-tooltip [nzTooltipTitle]='ticketForm.value.sapcause'
+                                                list="sapcause">
+                                            <datalist id="sapcause">
+                                                <option *ngFor="let value of causes" value={{value}}>
+                                            </datalist>
+
+                                            <div *ngIf="submitted && f.sapcause.errors" class="invalid-feedback">
+                                                <div *ngIf="f.sapcause.errors.required">SAP Cause is required
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>SAP Resolution</label>
+                                            <input nz-input formControlName="resolution" class="form-control"  nz-tooltip [nzTooltipTitle]='ticketForm.value.resolution'
+                                                list="resolution">
+                                            <datalist id="resolution">
+                                                <option *ngFor="let value of resolutions" value={{value}}>
+                                            </datalist>
+                                            <div *ngIf="submitted && f.resolution.errors" class="invalid-feedback">
+                                                <div *ngIf="f.resolution.errors.required">SAP Tab resolution is
+                                                    required</div>
+                                            </div>
+                                        </div> -->
+                                        <div class="form-group">
+                                            <label>RM Error</label>
+                                            <input nz-input formControlName="taberror"
+                                                (change)="selectedRmerror($event.target.value)" class="form-control"
+                                                nz-tooltip [nzTooltipTitle]='ticketForm.value.taberror' list="rmerror">
+                                            <datalist id="rmerror">
+                                                <option *ngFor="let value of rmerrors" (change)="selectedRmerror(value)"
+                                                    value={{value}}>
+                                            </datalist>
+                                            <!-- <input type="text" formControlName="taberror" class="form-control"
+                                                [ngClass]="{ 'is-invalid': submitted && f.taberror.errors }" /> -->
+                                            <div *ngIf="submitted && f.taberror.errors" class="invalid-feedback">
+                                                <div *ngIf="f.taberror.errors.required">SAPTab-Error</div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>RM Proposed Solution</label>
+                                            <nz-spin
+                                                [nzSpinning]="rmsolutions!=null && rmsolutions.length==0&&ticketForm.value.taberror && !ticketForm.value.solution"
+                                                [nzDelay]="500">
+                                                <input *ngIf="rmsolutions!=null" nz-input  formControlName="solution" [nzAutocomplete]="auto"  class="form-control"
+                                                nz-tooltip [nzTooltipTitle]='ticketForm.value.solution'>
+                                                <nz-autocomplete #auto>
+                                                    <nz-auto-option  *ngFor="let value of rmsolutions;let i=index"  (click)="selectRMresolution(i)" [class]="value.id"
+                                                    [nzValue]="value.proposedSolution" >{{value.proposedSolution}}</nz-auto-option>
+                                                </nz-autocomplete>
+                                                <!-- <div class="example-input form-control" *ngIf="rmsolutions==null">
+                                                    <input placeholder="input here" nz-input formControlName="solution"
+                                                        (input)="selectRMresolution($event)" [nzAutocomplete]="auto" />
+                                                    <nz-autocomplete [nzDataSource]="rmsolutions" nzBackfill #auto>
+                                                    </nz-autocomplete>
+                                                </div> -->
+                                                <input  *ngIf="rmsolutions==null" nz-tooltip [nzTooltipTitle]='ticketForm.value.solution' nz-input
+                                                    id="rms" (change)="selectRMresolution($event)"
+                                                    formControlName="solution"
+                                                    [class.input-disabled]='rmsolutions!=null && rmsolutions.length==0&&ticketForm.value.taberror && !ticketForm.value.solution'
+                                                    class="form-control" >
+                                            </nz-spin>
+
+                                            <datalist id="rmresolution">
+                                                <option *ngFor="let value of rmsolutions;let i=index" [id]="value.id"
+                                                    [data-value]="value.id" [class]="value.id"
+                                                    [value]="value.proposedSolution" nz-tooltip
+                                                    [nzTooltipTitle]='value.proposedSolution'>
+
+                                            </datalist>
+                                            <!-- <input type="text" formControlName="solution" class="form-control"
+                                                [ngClass]="{ 'is-invalid': submitted && f.solution.errors }" /> -->
+                                            <div *ngIf="submitted && f.solution.errors" class="invalid-feedback">
+                                                <div *ngIf="f.solution.errors.required">SAPTab-Proposed Solution
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>End User Response</label>
+                                            <!-- <textarea nz-input formControlName="enduserresponse"  nz-tooltip [nzTooltipTitle]='ticketForm.value.enduserresponse'
+                                                class="form-control"></textarea> -->
+                                            <nz-spin [nzSpinning]="inputLoader" [nzDelay]="500">
+                                                <input nz-tooltip [nzTooltipTitle]='ticketForm.value.enduserresponse'
+                                                    nz-input formControlName="enduserresponse"
+                                                    [class.input-disabled]='inputLoader' class="form-control"
+                                                    list="enduserresponse">
+                                            </nz-spin>
+
+                                            <datalist id="enduserresponse">
+                                                <option *ngFor="let value of endUserResponses"
+                                                    value={{value}} nz-tooltip [nzTooltipTitle]='value'>
+                                            </datalist>
+                                            <div *ngIf="submitted && f.enduserresponse.errors" class="invalid-feedback">
+                                                <div *ngIf="f.enduserresponse.errors.required">End User Response
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Resolution</label>
+                                            <textarea nz-input formControlName="textresolution" nz-tooltip
+                                                [nzTooltipTitle]='ticketForm.value.textresolution'
+                                                class="form-control"></textarea>
+                                            <div *ngIf="submitted && f.textresolution.errors" class="invalid-feedback">
+                                                <div *ngIf="f.textresolution.errors.required">Resolution
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <nz-spin [nzSpinning]="isSpinning" nzTip="Updating ticket" [nzDelay]="500">
+                                            <div class="text-center">
+
+                                                <button class="btn btn-primary mr-1"
+                                                    [disabled]="this.ticketForm.textresolution"
+                                                    (click)="updateTicket(true)">Update
+                                                    Ticket</button>
+                                                <button 
+                                                    class="btn btn-primary mr-1"  [disabled]="ticketForm.invalid" (click)="closeTicket()">Close
+                                                    Ticket</button>
+                                            </div>
+                                        </nz-spin>
+
+                                        <!-- <button nz-button nz-dropdown [nzDropdownMenu]="menu" [nzPlacement]="position">Submit</button>
+                                        <nz-dropdown-menu #menu="nzDropdownMenu">
+                                          <ul nz-menu>
+                                            <li nz-menu-item>Update Ticket</li>
+                                            <li nz-menu-item>Close Ticket</li>                                            
+                                          </ul>
+                                        </nz-dropdown-menu> -->
+                                    </form>
+                                    <ng-template #indicatorTemplate><i nz-icon nzType="loading"></i></ng-template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nz-layout>
+</nz-layout>

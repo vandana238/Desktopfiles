@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>
+  </title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=PT+Sans:400,400i,700,700i" rel="stylesheet">
+  <script>
+    window.name = "liveagent"
+//     // localStorage.clear()
+//     var count = 0;
+//     var title = document.title;
+//     var favicon = new Favico({
+// 	position  :'up',
+// 	animation :'popFade',
+// 	bgColor   :'#dd2c00',
+// 	textColor :'#fff0e2'
+// });
+    function changeTitle() {
+      var num = 0;
+      function generateNum() {
+        num++;
+        return num;
+      }
+
+      function showFaviconBadge() {
+        var num = generateNum();
+        favicon.badge(num);
+      }
+
+      function newUpdate() {
+        update = setInterval(showFaviconBadge, 2000);
+      }
+
+      var docBody = document.getElementById('site-body');
+      docBody.onload = newUpdate;
+    }
+  </script>
+
+</head>
+
+<body>
+  <app-root></app-root>
+</body>
+
+</html>

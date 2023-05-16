@@ -1,0 +1,402 @@
+<nz-layout *ngIf="myprofile.role!='Agent'">
+    <nz-layout class="inner-layout">
+        <!-- <h1>sdfsdofj</h1> -->
+        <app-header></app-header>
+        <nz-layout class="right-layout" style="background: #ECECEC;padding: 20px;">
+
+            <nz-layout style="background: #ECECEC;padding: 0px;padding-top: 0px;">
+
+                <div style="background: #ECECEC;">
+                    <nz-card [nzBordered]="false" nzTitle="Agent On/Off">
+                        <div nz-row>
+                            <div nz-col nzSpan="17">
+                                <p>
+                                    Control the Agent visibility using this function.
+                                    Turning the Agent off will make make all the agents offline and won't get any requests<br>To switch the agent <b><i>on/off</i></b> please confirm your <b>password</b>.
+                                </p>
+                            </div>
+                            <div nz-col nzSpan="1"></div>
+                            <nz-modal [(nzVisible)]="ismodalVisible" 
+                                nzTitle="Confirmation" (nzOnCancel)="handleCancel()">
+                                <div>
+                                    <input   type="password" nz-input placeholder="Enter your password"
+                                        [(ngModel)]="checkPwd" 
+                                        nzSize="large" />
+                                </div>
+                                <span *ngIf="showerror"  style="color:red">Please enter correct password.</span>
+
+                                <div *nzModalFooter>
+                                    <button nz-button nzType="primary" [disabled]="isCategory"
+                                        [nzLoading]="isConfirmLoading"
+                                        (click)="handleOk(activeindex)"><p *ngIf="switchValue">Off</p><p *ngIf="!switchValue">On</p></button>
+                                    <button nz-button nzType="danger"
+                                        (click)="handleCancel()">Cancel</button>
+                                </div>
+                            </nz-modal>
+                            <div nz-col nzSpan="4" class="agent-switch">
+                              
+                            </div>
+                            <div nz-col nzSpan="2" class="agent-switch"> <nz-switch [nzControl]="true" (click)="switchAgent()" [(ngModel)]="switchValue"></nz-switch></div>
+                        </div>
+                    </nz-card>
+                </div>
+                <!-- <ng-template #extraTemplate>
+                    <a>More</a>
+                  </ng-template> -->
+                <nz-drawer [nzBodyStyle]="{ height: 'calc(100% - 55px)', overflow: 'auto', 'padding-bottom': '53px' }"
+                    [nzWidth]="500" [nzMaskClosable]='false' [nzVisible]="visible" nzTitle="Create New User"
+                    (nzOnClose)="close()">
+                    <nz-card [nzActions]="[ actionEllipsis]">
+                        <div>
+                            <!-- <form> -->
+                            <div class="form-group">
+                                <label class="label-text">User ID</label>
+                                <input type="text" class="form-control" placeholder="John" aria-describedby="emailHelp"
+                                    id="username" required ngModel name="username" #username="ngModel">
+                                <br>
+                                <div *ngIf="username.invalid && (username.dirty || username.touched)"
+                                    class="alert alert-danger">
+                                    <div *ngIf="username.errors.required">
+                                        <i class="fa fa-warning"></i>&nbsp; User ID is required.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="label-text">Full Name</label>
+                                <input id="name" required ngModel name="name" #name="ngModel" type="text"
+                                    class="form-control" placeholder="John Doe" aria-describedby="emailHelp">
+                                <br>
+                                <div *ngIf="name.invalid && (name.dirty || name.touched)" class="alert alert-danger">
+                                    <div *ngIf="name.errors.required">
+                                        <i class="fa fa-warning"></i>&nbsp; Full Name is required.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="label-text">Email address</label>
+
+                                <input type="email" class="form-control" placeholder="John@gmail.com"
+                                    aria-describedby="emailHelp" id="email" required ngModel name="email"
+                                    #email="ngModel">
+                                <br>
+                                <div *ngIf="email.invalid && (email.dirty || email.touched)" class="alert alert-danger">
+                                    <div *ngIf="email.errors.required">
+                                        <i class="fa fa-warning"></i>&nbsp; Email is required.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="label-text">Password</label>
+                                <!-- <input [(ngModel)]="cpwd" type='text' class="form-control"     aria-describedby="emailHelp"> -->
+                                <nz-input-group [nzSuffix]="suffixTemplate1" [nzPrefix]="suffixTemplate2">
+                                    <input [type]="password ? 'text' : 'password'" nz-input #userinput
+                                        placeholder="*******" [(ngModel)]="pwd" />
+                                </nz-input-group>
+                                <ng-template #suffixTemplate2>
+                                    <i class="pointer" style="padding: 12px 6px 6px 0px;font-size: 20px;" nz-icon
+                                        [nzType]="password ? 'eye-invisible' : 'eye'"
+                                        (click)="password = !password"></i>
+                                </ng-template>
+                                <ng-template #suffixTemplate1>
+                                    <i class="pointer" style="padding: 12px 6px 6px 0px;font-size: 20px;" nz-icon
+                                        [nzType]="'copy'" (mouseleave)="password =false" (mouseover)="password =true"
+                                        (click)="copyInputMessage(userinput)"></i>
+                                </ng-template>
+                                <button style="top:5px" (click)="generatePassword(userinput)" nz-button nzType="primary"
+                                    [nzLoading]="loading"><i nz-icon nzType="lock"></i>Generate Password</button>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label class="label-text">Organization</label>
+                                <input type="text" class="form-control" placeholder="Miraclesoft"
+                                    aria-describedby="emailHelp" id="org" required ngModel name="org" #org="ngModel">
+
+                                <br>
+                                <div *ngIf="org.invalid && (org.dirty || org.touched)" class="alert alert-danger">
+                                    <div *ngIf="org.errors.required">
+                                        <i class="fa fa-warning"></i>&nbsp; Organization is required.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="label-text">Role</label><br>
+                                <nz-radio-group [(ngModel)]="role">
+                                    <label nz-radio nzValue="Admin">Admin</label>
+                                    <label nz-radio nzValue="Agent">Agent</label>
+                                </nz-radio-group>
+                            </div>
+                            <!-- <button type="submit" class="btn btn-primary">Submit</button> -->
+                            <!-- </form> -->
+                        </div>
+                        <ng-template #actionSetting>
+                            <i nz-icon nzType="setting"></i>
+                        </ng-template>
+                        <ng-template #actionEdit>
+                            <i nz-icon nzType="edit"></i>
+                        </ng-template>
+                        <ng-template #actionEllipsis>
+                            <div style="margin-top: 10px;">
+                                <button nz-button nzType="default" (click)="clear()" nzDanger>Clear</button>
+                                <button nz-button nzType="primary"
+                                    (click)="register(name.value,username.value,email.value,org.value,pwd.value);">Save</button>
+                            </div>
+
+                        </ng-template>
+                    </nz-card>
+                </nz-drawer>
+                <nz-card [nzTitle]="temp">
+                    <ng-template #temp>
+                        Available users
+                        <button style="float: right;top: 9px;" nz-button nzType="primary" (click)="open()">Add New
+                            User</button>
+                        <div class="converation-search mr-2" style="float: right;margin: -4px;">
+                            <nz-input-group [nzSuffix]="suffixIconSearch">
+                                <input type="text" nz-input [(ngModel)]="searchText" placeholder="Search User" />
+                            </nz-input-group>
+                            <ng-template #suffixIconSearch>
+                                <i nz-icon nzType="search"></i>
+                            </ng-template>
+                        </div>
+                    </ng-template>
+
+                    <div style="display: flex;justify-content: center; height: 70vh; align-items: center;" *ngIf="loader">
+                        <nz-spin [nzSpinning]="'true'" nzSimple [nzSize]="'large'"></nz-spin>
+                    </div>
+                    <nz-table #headerTable [nzData]="agentlist" [nzNoResult]="'No data'" [nzPageSize]="pageSize" *ngIf="!loader"
+                        [nzShowPagination]="false" (nzPageIndexChange)=changeIndex($event) [nzScroll]="{ y: '47vh'}">
+                        <thead>
+                            <tr>
+                                <th nzWidth="50px">#</th>
+                                <th nzWidth="15%">Full Name</th>
+                                <th nzWidth="20%">User ID</th>
+                                <th nzWidth="20%">Email</th>
+                                <th nzWidth="12%">Organization</th>
+                                <th nzWidth="10%">Created On</th>
+                                <th nzWidth="80px">Role</th>
+                                <th nzWidth="80px">Status</th>
+                                <th nzWidth="100px">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <span></span>
+                            <tr *ngFor="let data of agentlist| email: searchText;let i=index">
+
+                                <!-- {{pageIndex}}{{pageIndex*pageSize}} -->
+                                <td>{{pageIndex*pageSize+(i+1)}}</td>
+                                <td> {{data.fullName | titlecase}}</td>
+                                <td> {{data.userid | lowercase}} </td>
+                                <td> {{data.email | lowercase}} </td>
+                                <td [nzAlign]="'center'">{{data.organization}}<span
+                                        *ngIf="data.organization==''">-</span></td>
+                                <td> {{data.createdAt | date :'medium'}} </td>
+                                <td>
+                                    <nz-tag [nzColor]="data.role=='Agent'?'#2db7f5':'#eb6709 '">{{ data.role}}</nz-tag>
+                                </td>
+                                <td>  
+                                   
+                                        <nz-tag  nz-dropdown [nzDropdownMenu]="menu4" *ngIf="switchValue"
+                                        [nzColor]="data.status==='Online'?'#28a745':data.status==='Busy'?'#dc3545':data.status==='Offline'?'rgba(0, 0, 0, 0.65)':'#fd7e14'">
+                                        {{ data.status}}<i style="vertical-align: -0.1rem;font-size: 10px;padding: 2px;" nz-icon nzType="down"></i></nz-tag>
+                                    <nz-dropdown-menu #menu4="nzDropdownMenu">
+                                        <ul nz-menu >
+                                          <li nz-menu-item (click)="updateUserStatus('Online',i)" >Online</li>
+                                          <li nz-menu-item (click)="updateUserStatus('Offline',i)">Offline</li>
+                                        </ul>
+
+                                      </nz-dropdown-menu> 
+                                    <nz-tag   *ngIf="!switchValue" 
+                                        [nzColor]="data.status==='Online'?'#28a745':data.status==='Busy'?'#dc3545':data.status==='Offline'?'rgba(0, 0, 0, 0.65)':'#fd7e14'">
+                                        {{ data.status}}</nz-tag>
+                                </td>
+                                <td [nzalign]="'center'">
+                                    <!-- <a style="color: red;" (click)="showConfirm(data._id,i)">Delete</a> -->
+                                    <div>
+                                        <ng-container>
+                                            <span class="pointer" style="padding:10px 10px 10px 0px;"
+                                                (click)="editByUser(data)">
+                                                <i style="color: rgb(15, 106, 241);" nz-icon nzType="edit"
+                                                    nzTheme="outline"></i>
+                                            </span>
+                                            <span class="pointer" style="padding: 10px;"
+                                                (click)="showConfirm(data._id,i)">
+                                                <i style="color: red;" nz-icon nzType="delete" nzTheme="outline"></i>
+                                            </span>
+                                        </ng-container>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </nz-table>
+                </nz-card>
+                <nz-drawer *ngIf="visible1"
+                    [nzBodyStyle]="{ height: 'calc(100% - 55px)', overflow: 'auto', 'padding-bottom': '53px' }"
+                    [nzMaskClosable]="true" [nzWidth]="500" [nzVisible]="visible1" nzTitle="Edit User"
+                    (nzOnClose)="close1()">
+
+                    <nz-card [nzActions]="[ actionEllipsis]">
+                        <div>
+                            <!-- <form> -->
+                            <div nz-col nzSpan="24" class="form-field">
+                                <div class="form-group">
+                                    <label class="label-text">Used Id</label>
+                                    <!-- <span class=" badge1">{{editUser.userid | titlecase}}</span> -->
+                                    <input disabled [(ngModel)]="editUser.userid" type="text" class="form-control"
+                                        placeholder="John Doe" aria-describedby="emailHelp">
+                                </div>
+
+                            </div>
+
+                            <div nz-col nzSpan="24" class="form-field">
+                                <div class="form-group">
+                                    <label class="label-text">Full Name</label>
+
+                                    <!-- <span class="badge1">{{editUser.name | titlecase}}</span> -->
+                                    <input disabled [(ngModel)]="editUser.fullName" type="text" class="form-control"
+                                        placeholder="John Doe" aria-describedby="emailHelp">
+                                </div>
+                            </div>
+
+                            <div nz-col nzSpan="24" class="form-field">
+                                <div class="form-group">
+                                    <label class="label-text">Email Address</label>
+                                    <input [(ngModel)]="editUser.email" type="email" class="form-control"
+                                        placeholder="John.doe@gmail.com" aria-describedby="emailHelp">
+                                </div>
+
+                            </div>
+                            <div nz-col nzSpan="24" class="form-field">
+                                <!-- <div class="form-group">
+                                    <label class="label-text">Role</label>
+                                    <input disabled type="text" class="form-control" placeholder="John.doe@gmail.com"
+                                        value={{editUser.accountType}} aria-describedby="emailHelp">
+                                </div> -->
+                                <div class="form-group">
+                                    <label class="label-text">Role</label><br>
+                                    <nz-radio-group [(ngModel)]="editUser.accountType">
+                                        <label nz-radio nzValue="Admin">Admin</label>
+                                        <label nz-radio nzValue="Agent">Agent</label>
+                                    </nz-radio-group>
+                                </div>
+                            </div>
+                            <div nz-col nzSpan="24" class="form-field">
+                                <div class="form-group">
+                                    <label class="label-text">Created On</label>
+                                    <input disabled type="text" class="form-control" placeholder="John.doe@gmail.com"
+                                        value="{{editUser.createdAt | date:'short'}}" aria-describedby="emailHelp">
+                                </div>
+
+                            </div>
+                            <div nz-col nzSpan="24" class="form-field">
+                                <div class="form-group">
+                                    <label class="label-text">Organization</label>
+                                    <input disabled type="text" class="form-control" placeholder="John.doe@gmail.com"
+                                        value={{editUser.organization}} aria-describedby="emailHelp">
+                                </div>
+
+                            </div>
+                            <div nz-col nzSpan="24" class="form-field">
+                                <div class="form-group">
+                                    <label class="label-text">Reset Password</label>
+                                    <!-- <input [(ngModel)]="cpwd" type='text' class="form-control"     aria-describedby="emailHelp"> -->
+                                    <nz-input-group [nzSuffix]="suffixTemplate1" [nzPrefix]="suffixTemplate2">
+                                        <input [type]="resetPassword ? 'text' : 'password'" nz-input #userinput
+                                            [(ngModel)]="resetpwd" />
+                                    </nz-input-group>
+                                    <ng-template #suffixTemplate2>
+                                        <i class="pointer" style="padding: 12px 6px 6px 0px;font-size: 20px;" nz-icon
+                                            [nzType]="password ? 'eye-invisible' : 'eye'"
+                                            (click)="resetPassword = !resetPassword"></i>
+                                    </ng-template>
+                                    <ng-template #suffixTemplate1>
+                                        <i class="pointer" style="padding: 12px 6px 6px 0px;font-size: 20px;" nz-icon
+                                            [nzType]="'copy'" (click)="copyInputMessage(userinput)"></i>
+                                    </ng-template>
+                                </div>
+                                <button style="top:5px" (click)="generatePassword(userinput)" nz-button nzType="primary"
+                                    [nzLoading]="loading"><i nz-icon nzType="lock"></i>Generate Password</button>
+                            </div>
+                        </div>
+                        <ng-template #actionSetting>
+                            <i nz-icon nzType="setting"></i>
+                        </ng-template>
+                        <ng-template #actionEdit>
+                            <i nz-icon nzType="edit"></i>
+                        </ng-template>
+                        <ng-template #actionEllipsis>
+                            <div style="margin-top: 10px;">
+                                <button nz-button nzType="primary"
+                                    (click)="updatePassword(editUser.userid)">Update</button>
+                            </div>
+
+                        </ng-template>
+                    </nz-card>
+                </nz-drawer>
+            </nz-layout>
+
+        </nz-layout>
+
+    </nz-layout>
+</nz-layout>
+
+
+<nz-layout *ngIf="myprofile.role=='Agent'">
+    <nz-layout class="inner-layout">
+        <!-- <h1>sdfsdofj</h1> -->
+        <app-header></app-header>
+        <nz-layout class="right-layout" style="background: #ECECEC;padding: 20px;height: 100vh;">
+
+            <nz-layout style="background: #ECECEC;padding: 0px;padding-top: 0px;">
+                <nz-card [nzTitle]="temp">
+                    <ng-template #temp>
+                        Agent Status
+                        <!-- <button style="float: right;top: 8px;" nz-button nzType="primary" (click)="open()">Add New
+                            User</button>
+                        <div class="converation-search mr-2" style="float: right;margin: -4px;">
+                            <nz-input-group [nzSuffix]="suffixIconSearch">
+                                <input type="text" nz-input [(ngModel)]="searchText"
+                                    placeholder="Search User" />
+                            </nz-input-group>
+                            <ng-template #suffixIconSearch>
+                                <i nz-icon nzType="search"></i>
+                            </ng-template>
+                        </div> -->
+                    </ng-template>
+             
+
+                    <nz-table #headerTable [nzData]="agentList1" [nzNoResult]="'No data'" [nzShowPagination]="false" [nzScroll]="{ y: '65vh'}">
+                        <thead>
+                            <tr>
+                                <th nzWidth="5%">#</th>
+                                <th  nzWidth="25%">Full Name</th>
+                                <th nzWidth="25%">User ID</th>
+                                <th nzWidth="25%">Email</th>
+                                <th nzWidth="10%">Role</th>
+                                <th nzWidth="10%">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let data of agentList1;let i=index">
+                              
+                                <td>{{i+1}}</td>
+                                <td> {{data.fullName | titlecase}}</td>
+                                <td> {{data.userid | lowercase}} </td>
+                                <td> {{data.email | lowercase}} </td>
+                                <td>
+                                    <nz-tag [nzColor]="data.role=='Agent'?'#2db7f5':'#eb6709 '">{{ data.role}}</nz-tag>                            
+                                </td>
+                                <td>
+                                    <nz-tag [nzColor]="data.status==='Online'?'#28a745':data.status==='Busy'?'#dc3545':data.status==='Offline'?'rgba(0, 0, 0, 0.65)':'#fd7e14'">{{ data.status}}</nz-tag>  
+                                </td>
+                               
+                            </tr>
+                        </tbody>
+                    </nz-table>
+                </nz-card>
+                
+            </nz-layout>
+
+        </nz-layout>
+
+    </nz-layout>
+</nz-layout>

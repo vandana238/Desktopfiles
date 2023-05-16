@@ -1,0 +1,50 @@
+
+
+<nz-layout class="slider-layout-wrapper">
+  <nz-sider nzCollapsible nzWidth="230px"  [nzTrigger]="temp" *ngIf="service.isLoggedin" class="sider-layout">
+    <ng-template #temp>
+      <i style="width: 100%;" nz-icon nzType="double-left"  (click)="isCollapsed=!isCollapsed" [nzRotate]="isCollapsed?'180':'360'" nzTheme="outline"></i>
+    </ng-template>
+    <div class="wrapper">
+      <div class="logo card-body text-uppercase" style="text-align: center;">
+        <!--  <i nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" (click)="toggleCollapsed()"></i> -->
+
+        <span *ngIf="isCollapsed"><img src="../assets/favicon.svg" ></span>
+        <span *ngIf="!isCollapsed">Miracle's <br>Live Agent Portal</span>
+      </div>
+      <ul nz-menu nzMode="inline" nzTheme="dark" [nzInlineCollapsed]="isCollapsed" >
+        <li  nz-menu-item nz-tooltip nzTooltipPlacement="right" nzTitle="Home" [nzSelected]="route.url=='/home'" (click)="select('home')">
+          <i nz-icon nzType="home"></i>
+          <span >Home</span>
+        </li>
+        <!-- <li nz-submenu nzTitle="Configurations" nzIcon="setting"  *ngIf="service.role=='Admin'">
+          <ul>
+
+            <li nz-submenu nzTitle="Submenu">
+              <ul>
+                <li nz-menu-item>Option 7</li>
+                <li nz-menu-item>Option 8</li>
+              </ul>
+            </li>
+          </ul>
+        </li> -->
+        <!-- {{service.role}} -->
+        <li nz-submenu nzTitle="Admin Control" nzIcon="user-switch"  *ngIf="service.role && (service.role=='Admin' || service.role=='superAdmin')">
+          <ul>
+            <li nz-menu-item (click)="select('users')" [nzSelected]="route.url=='/users'"><a></a>User Management</li>
+            <li nz-menu-item (click)="select('quick-responses')" [nzSelected]="route.url=='/quick-responses'" ><a></a>Quick Response</li>
+
+          </ul>
+        </li>
+        <li (click)="select('users')"  nz-menu-item nz-tooltip nzTooltipPlacement="right" nzTitle="Agent Status" *ngIf="service.role &&service.role=='Agent'">
+          <i nz-icon nzType="user"></i>
+          <span >Agent Status</span>
+        </li>
+
+      </ul>
+    </div>
+  </nz-sider>
+  <div style="width: 100%;">
+    <router-outlet   ></router-outlet>
+  </div>
+</nz-layout>

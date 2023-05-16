@@ -1,0 +1,101 @@
+
+
+<div nz-row class="container-fluid topbar-container border-bottom"
+    style="    color: black;padding: 1rem 1.25rem 1rem 1.25rem;font-weight: 700;">
+    <div nz-col nzSpan="6" style="display: flex; align-self: center;">
+        <nz-breadcrumb style="place-items: center;">
+            <nz-breadcrumb-item>
+                Home > {{headerText}}
+            </nz-breadcrumb-item>
+        </nz-breadcrumb>
+    </div>
+    <div nz-col nzSpan="14" style="text-align: center;">
+        <!-- <button *ngIf="switchValue && myprofile.currentStatus==='Offline'" nz-button nzType="danger" nzDanger>As you are in offline. You won't get new requests</button> -->
+        <!-- <button *ngIf="!switchValue && myprofile.currentStatus==='Offline'" nz-button nzType="warning" nzDanger>Agent portal is off. You cannot change or get any new requests</button> -->
+        <nz-alert [nzShowIcon]="true" style="margin-top: -4px;" *ngIf="switchValue && myprofile.currentStatus!='Online'" nzType="warning" nzMessage="Your status is set to {{myprofile.currentStatus}} - You won't receive new requests"></nz-alert>
+        <nz-alert [nzShowIcon]="true" style="margin-top: -4px;" *ngIf="!switchValue && myprofile.currentStatus!='Online'" nzType="info" [nzMessage]="alertTemplaate"></nz-alert>
+        <ng-template #alertTemplaate>
+            <span>Live agent portal is switched <span style="color:red">OFF</span>  by admin - You cannot change your status and won't receive any new requests</span>
+        </ng-template>
+
+    </div>
+    <div nz-col nzSpan="4" style="display: flex;flex-flow: row-reverse;">
+        <div>
+
+            <!-- <span style="padding: 10px;cursor: pointer;" nz-dropdown [nzDropdownMenu]="notify" nzPlacement="bottomRight"
+                nz-popover [nzPopoverContent]="notify">
+                <nz-badge [nzDot]="'true'" style="vertical-align: text-top;font-size: 22px;"><i nz-icon nzType="bell"></i>
+                </nz-badge>
+            </span> -->
+            <span nz-dropdown [nzDropdownMenu]="menu" nzPlacement="bottomRight"
+                style="margin-top: 10px;cursor: pointer;">
+                <nz-avatar nzText="{{myprofile.name | getfirstletter}}" style="background-color:#333;">
+                </nz-avatar>
+                <nz-badge style="top: -15px;"
+                    [nzStatus]="myprofile.currentStatus==='Online'?'success':myprofile.currentStatus==='Busy'?'error':myprofile.currentStatus==='Offline'?'default':'warning'">
+                </nz-badge>
+            </span>
+            <i nz-icon nzType="more"></i>
+        </div>
+    </div>
+    <nz-dropdown-menu #menu="nzDropdownMenu">
+        <ng-template #titleTpl>
+            <span>
+                <nz-badge
+                    [nzStatus]="myprofile.currentStatus==='Online'?'success':myprofile.currentStatus==='Busy'?'error':myprofile.currentStatus==='Offline'?'default':'warning'"
+                    [nzText]="myprofile.currentStatus"></nz-badge>
+            </span>
+        </ng-template>
+        <ul nz-menu [class.disabled-dropdown]="switchValue?false:true">
+            <li nz-submenu [nzTitle]="titleTpl">
+                <ul>
+                    <li nz-menu-group>
+                        <ul>
+                            <li nz-menu-item (click)="changeStatus('Online')">
+                                <nz-badge nzStatus="success" nzText="Online"></nz-badge>
+                            </li>
+                            <li nz-menu-item (click)="changeStatus('Busy')">
+                                <nz-badge nzStatus="error" nzText="Busy"></nz-badge>
+                            </li>
+                            <li nz-menu-item (click)="changeStatus('Offline')">
+                                <nz-badge nzStatus="default" nzText="Offline"></nz-badge>
+                            </li>
+                            <li nz-menu-item (click)="changeStatus('Away')">
+                                <nz-badge nzStatus="warning" nzText="Away"></nz-badge>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <nz-card style="width:200px;" [nzActions]="[actionSetting, actionLogout]">
+            <nz-card-meta [nzTitle]="myprofile.name" [nzDescription]='myprofile.role' [nzAvatar]="avatarTemplate">
+            </nz-card-meta>
+        </nz-card>
+        <ng-template #avatarTemplate>
+            <nz-avatar
+                nzSrc="data:image/png;base64,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">
+            </nz-avatar>
+        </ng-template>
+        <ng-template #actionSetting>
+            <div (click)="showProfile()">
+                <i style="margin:0px 40px 0px 0px" nz-icon nzType="setting"></i>
+            </div>
+        </ng-template>
+        <ng-template #actionLogout>
+            <div>
+                <i style="margin:0px 40px 0px 0px" nz-icon nzType="logout" (click)="logout()"></i>
+            </div>
+        </ng-template>
+    </nz-dropdown-menu>
+    <ng-template #notify>        
+        <div nz-row>
+          
+        </div>
+        <nz-divider style="margin:5px"></nz-divider>
+        <div nz-row>
+            The portal is Currently offline
+        </div>        
+    </ng-template>
+
+</div>

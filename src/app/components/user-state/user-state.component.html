@@ -1,0 +1,60 @@
+<nz-layout>
+    <nz-layout class="inner-layout">
+        <!-- <h1>sdfsdofj</h1> -->
+        <app-header></app-header>
+        <nz-layout class="right-layout" style="background: #ECECEC;padding: 20px;height: 100vh;">
+
+            <nz-layout style="background: #ECECEC;padding: 0px;padding-top: 0px;">
+                <nz-card [nzTitle]="temp">
+                    <ng-template #temp>
+                        Agent Status
+                        <!-- <button style="float: right;top: 8px;" nz-button nzType="primary" (click)="open()">Add New
+                            User</button>
+                        <div class="converation-search mr-2" style="float: right;margin: -4px;">
+                            <nz-input-group [nzSuffix]="suffixIconSearch">
+                                <input type="text" nz-input [(ngModel)]="searchText"
+                                    placeholder="Search User" />
+                            </nz-input-group>
+                            <ng-template #suffixIconSearch>
+                                <i nz-icon nzType="search"></i>
+                            </ng-template>
+                        </div> -->
+                    </ng-template>
+             
+
+                    <nz-table #headerTable [nzData]="agentList" [nzNoResult]="'No data'" [nzShowPagination]="false" [nzScroll]="{ y: '65vh'}">
+                        <thead>
+                            <tr>
+                                <th nzWidth="5%">#</th>
+                                <th  nzWidth="25%">Full Name</th>
+                                <th nzWidth="25%">User ID</th>
+                                <th nzWidth="25%">Email</th>
+                                <th nzWidth="10%">Role</th>
+                                <th nzWidth="10%">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let data of agentList;let i=index">
+                              
+                                <td>{{i+1}}</td>
+                                <td> {{data.fullName | titlecase}}</td>
+                                <td> {{data.userid | lowercase}} </td>
+                                <td> {{data.email | lowercase}} </td>
+                                <td>
+                                    <nz-tag [nzColor]="data.role=='Agent'?'#2db7f5':'#eb6709 '">{{ data.role}}</nz-tag>                            
+                                </td>
+                                <td>
+                                    <nz-tag [nzColor]="data.status==='Online'?'#28a745':data.status==='Busy'?'#dc3545':data.status==='Offline'?'rgba(0, 0, 0, 0.65)':'#fd7e14'">{{ data.status}}</nz-tag>  
+                                </td>
+                               
+                            </tr>
+                        </tbody>
+                    </nz-table>
+                </nz-card>
+                
+            </nz-layout>
+
+        </nz-layout>
+
+    </nz-layout>
+</nz-layout>

@@ -1,0 +1,17 @@
+<!-- <div class="container-fluid topbar-container border-bottom">
+    <div>
+      <div class="error-code">401</div> 
+      <div class="error-text">Unauthorized</div>
+    </div>
+    <div  class="error-text" >
+       You don't have right access to this page
+     </div>
+     <div>
+
+     </div>
+</div> -->
+<nz-result nzStatus="403" nzTitle="403" nzSubTitle="Sorry, you are not authorized to access this page.">
+    <div nz-result-extra>
+      <button nz-button nzType="primary" (click)="back()">Back Home</button>
+    </div>
+  </nz-result>

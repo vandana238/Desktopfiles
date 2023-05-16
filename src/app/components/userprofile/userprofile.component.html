@@ -1,0 +1,106 @@
+<nz-layout>
+    <nz-layout class="inner-layout">
+        <!-- <h4>sdfsdofj</h4> -->
+        <app-header></app-header>
+        <nz-layout class="right-layout" style="background: #ECECEC;padding: 50px;">
+            <nz-card [nzActions]="[ actionEllipsis]">
+               
+                <div>
+                    <h4>Details</h4>
+                    <div nz-row>
+                        <div nz-col nzSpan="8" class="form-field" style="text-align: center;">
+                         <!-- <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTA1wZDzGDb6SOI4MV4fxFwiuLotlSDyHO89g&usqp=CAU"> -->
+                        <div class="profile">{{myProfile.name | getfirstletter }}</div> 
+                        
+                        </div>
+                        <div nz-col nzSpan="8" class="form-field">
+                            <div class="form-group">
+                                <label class="label-text">Used Id</label><br>
+                                 <span class=" badge1">{{myProfile.userId }}</span>
+                                <!-- <input disabled [(ngModel)]="username" type="text" class="form-control" placeholder="John Doe"
+                                    aria-describedby="emailHelp"> -->
+                            </div>
+                            <div class="form-group">
+                                <label class="label-text">Full Name</label>
+                                <br>
+                                 <span class="badge1">{{myProfile.name | titlecase}}</span>
+                                <!-- <input disabled [(ngModel)]="name" type="text" class="form-control" placeholder="John Doe"
+                                    aria-describedby="emailHelp"> -->
+                            </div>
+
+                        </div>
+                        <div nz-col nzSpan="8" class="form-field">
+                            <div class="form-group">
+                                <label class="label-text">Email address</label>  
+                                <br>
+                                 <span class=" badge1">{{myProfile.email }}</span>                              
+                                <!-- <input disabled [(ngModel)]="email" type="email" class="form-control"
+                                    placeholder="John.doe@gmail.com" aria-describedby="emailHelp"> -->
+                            </div>
+                            <div class="form-group">
+                                <label class="label-text">Role</label>
+                                <br>
+                                 <span class=" badge1">{{myProfile.role | titlecase}}</span>
+                                <!-- <input disabled type="email" class="form-control"
+                                    placeholder="John.doe@gmail.com" value={{role}}  aria-describedby="emailHelp"> -->
+                            </div>
+                        </div>                       
+                    </div>
+                    <h4>Change Password</h4>
+                    <div nz-row>
+                       
+                        <div nz-col nzSpan="8" class="form-field">
+                            
+                           
+                            <div class="form-group">
+                                <label  class="label-text">Current Password</label>
+                                <!-- <input [(ngModel)]="cpwd" type='text' class="form-control"     aria-describedby="emailHelp"> -->
+                                <nz-input-group [nzSuffix]="suffixTemplate1"  nzValidateStatus="error" >
+                                    <input [type]="currentPassword ? 'text' : 'password'" nz-input   [(ngModel)]="cpwd" />
+                                  </nz-input-group>
+                                  <ng-template #suffixTemplate1>
+                                    <i  class="pointer" style="padding: 8px 4px 4px 8px;font-size: 20px;" nz-icon [nzType]="currentPassword ? 'eye-invisible' : 'eye'" (click)="currentPassword = !currentPassword"></i>
+                                  </ng-template>
+                            </div>
+                        </div>
+                        <div nz-col nzSpan="8" class="form-field">
+                            <div class="form-group">
+                                <label  class="label-text">New Password</label>
+                                <!-- <input [(ngModel)]="cpwd" type='text' class="form-control"     aria-describedby="emailHelp"> -->
+                                <nz-input-group [nzSuffix]="suffixTemplate2">
+                                    <input [type]="newPassword ? 'text' : 'password'" nz-input   [(ngModel)]="newpwd" />
+                                  </nz-input-group>
+                                  <ng-template #suffixTemplate2>
+                                    <i  class="pointer" style="padding: 8px 4px 4px 8px;font-size: 20px;" nz-icon [nzType]="newPassword ? 'eye-invisible' : 'eye'" (click)="newPassword = !newPassword"></i>
+                                  </ng-template>
+                            </div>
+                        </div>
+
+                        <div nz-col nzSpan="8" class="form-field">
+                            <div class="form-group">
+                                <label  class="label-text">Re-Enter Password</label>
+                                <!-- <input [(ngModel)]="cpwd" type='text' class="form-control"     aria-describedby="emailHelp"> -->
+                                <nz-input-group [nzSuffix]="suffixTemplate3">
+                                    <input [type]="newPassword1 ? 'text' : 'password'" nz-input   [(ngModel)]="newpwd1" />
+                                  </nz-input-group>
+                                  <ng-template #suffixTemplate3>
+                                    <i  class="pointer" style="padding: 8px 4px 4px 8px;font-size: 20px;" nz-icon [nzType]="newPassword1 ? 'eye-invisible' : 'eye'" (click)="newPassword1 = !newPassword1"></i>
+                                  </ng-template>
+                            </div>
+                            <span *ngIf="newpwd1!=newpwd" nzDanger>Password should match</span>
+                        </div>
+                    </div>
+                   
+                </div>        
+                <ng-template #actionEllipsis>
+
+                    <div style="margin-top: 10px;"> 
+                        <button nz-button nzType="primary" [disabled]="newpwd1!=newpwd" (click)="showConfirm()">Update</button>
+                    </div>
+                    
+
+                </ng-template>
+            </nz-card>
+        </nz-layout>
+    </nz-layout>
+</nz-layout>

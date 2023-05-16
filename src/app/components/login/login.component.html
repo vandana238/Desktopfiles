@@ -1,0 +1,95 @@
+<div class="container-scroller">
+    <div class="container-fluid page-body-wrapper full-page-wrapper">
+        <div class="content-wrapper d-flex align-items-center auth ">
+            <div class="row w-100">
+                <div class="col-lg-7 mx-auto">
+                    <div class="row">
+                        <div class="col-lg-6 col-sm-6 col-12 bgclr">
+                            <ul class="text welcome-text">
+                                <br><br><br>
+                                <li style="line-height:2">Welcome to</li>
+                                <!-- <li style="font-weight:700;line-height:1.7;width: 116%;margin-left: -48px;"> Live Agent Portal -->
+                                <li style="font-weight:700;line-height:1.7;">Miracle's Live Agent Portal
+                                    <!-- <li style="font-weight:700;line-height:1.7;margin-left: -48px;"> Live Agent Portal  </li> -->
+                                <li style="line-height:2.1">where everything is for<br> <span
+                                        style="font-weight:600;">you!</span></li>
+                            </ul>
+                            <footer class="footer pull-down col-md-12" style="background-color:transparent;border:none;color:#232527;left: 0;
+                                text-align: right;
+                                position: absolute;
+                                bottom: 28px;">
+                                <div class="container-fluid clearfix">
+                                    <span class=" d-block text-sm-left d-sm-inline-block text-secondary"
+                                        style="text-decoration:none;font-size:0.8rem;color:#ffffff !important;">© 2020 Miracle Software Systems, Inc.</span>
+                                </div>
+                            </footer>
+                        </div>
+                        <div class="col-lg-6 col-sm-6 lgrght">
+                            <div class="auth-form text-left p-3 lght">
+                                <img src="assets/miracle-black.svg" class="mt-5 center" style="height:60px;">
+                                <h4 class="font-weight-light text-center text-secondary mt-4"
+                                    style="color:black !important;font-weight:300;font-size:1.13rem;">
+                                    Login to your account</h4> 
+                                <form class="pt-5" style="margin-top:-1rem;" (ngSubmit)="login()">
+                                    <div class="form-group">
+                                        <input type="text" class="form-controls  big-fonts" id="exampleInputEmail1"
+                                            placeholder="Username"  [(ngModel)]="user" name="inputEmail"
+                                            style="font-size:1.13rem; border-bottom: 1px solid #8c8c8c;background: transparent;border-top: 0;border-left: 0;border-right: 0;color:#000000;" required>
+                                        <i class="fa fa-user" style="color:#8c8c8c !important;margin-top:-26px;"></i>
+                                    </div>
+                                    <div class="form-group" style="margin-top:2rem;">
+                                        <input [type]="passwordVisible ? 'text' : 'password'" [(ngModel)]="pwd" class="form-controls  big-fonts" id="exampleInputPassword1"
+                                            placeholder="Password"  name="inputPass"
+                                            style="font-size:1.13rem; border-bottom: 1px solid #8c8c8c;background: transparent;border-top: 0;border-left: 0;border-right: 0;color:#000000;" required>
+                                            <i style="color:#8c8c8c !important;margin-top:-23px;" nz-icon [nzType]="passwordVisible ? 'eye-invisible' : 'eye'" (click)="passwordVisible = !passwordVisible"></i>
+
+                                    </div>
+                                    <br>
+                                    <!-- <br> -->
+                                    <div class="form">
+                                        <div class="row"
+                                            style="color:#ffffff;font-size:10px;margin-top:5%;font-size:10px;margin-bottom: 4%;">
+                                            <div class="col-sm-6">
+                                                <div class="checkbox">
+                                                    <div class="custom-control custom-checkbox m-0"><input
+                                                            class="custom-control-input" name="check1" id="staffing"
+                                                            type="checkbox"><label class="custom-control-label"
+                                                            for="staffing"
+                                                            style="color:black !important;text-transform:initial !important;letter-spacing:0px !important;font-size: 14px;">Remember
+                                                            me</label></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-block btn-raised"
+                                        (click)="spinner = !spinner;" ><span *ngIf="!spinner">Login</span> &nbsp;<i *ngIf="spinner" style="color: black;" nz-icon [nzType]="'loading'"></i>
+                                        <i class="fa fa-spinner fa-spin" *ngIf="spinner"></i></button>
+                                    <div class="bg-blue-grey bg-darken-3" style="background-color: #363636 !important;">
+                                    </div>
+                                </form>
+
+                                <div *ngIf="showPswdWrong" class="errormsg square">
+                                    <i class="fa fa-warning" style="font-size:20px;color:#ef4048"></i> Invalid
+                                    Username or Password
+                                    </div>
+
+                                    <!-- <div *ngIf="noaccess" class="errormsg square">
+                                        <i class="fa fa-warning" style="font-size:20px;color:#ef4048"></i> You don't have access for this application
+                                        </div>
+                                        
+
+                                    <div *ngIf="showAccessDenied" class="errormsg square">
+                                        <i class="fa fa-warning" style="font-size:20px;color:#ef4048"></i> You don't have access to this application anymore since the sessions that you were assigned to were made inactive
+                                        </div> -->
+
+                                <!-- <div class="copy-rights">
+                                    <p style="color:black;font-size:0.8rem;">© 2020 Miracle Software Systems, Inc.</p>
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
